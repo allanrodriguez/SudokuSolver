@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="enterPuzzleVm"
+            type="com.allanrodriguez.sudokusolver.viewmodels.EnterPuzzleViewModel" />
+
+        <variable
+            name="row"
+            type="Integer" />
+    </data>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:stretchColumns="1">
+
+        <include
+            layout="@layout/sudoku_cell"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cellVm="@{enterPuzzleVm.sudoku[safeUnbox(row)][0]}" />
+
+        <include
+            layout="@layout/sudoku_cell"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cellVm="@{enterPuzzleVm.sudoku[safeUnbox(row)][1]}" />
+
+        <include
+            layout="@layout/sudoku_cell"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cellVm="@{enterPuzzleVm.sudoku[safeUnbox(row)][2]}" />
+
+        <View
+            android:layout_width="@dimen/halfRowBorder"
+            android:layout_height="match_parent"
+            android:background="@color/black" />
+
+        <include
+            layout="@layout/sudoku_cell"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cellVm="@{enterPuzzleVm.sudoku[safeUnbox(row)][3]}" />
+
+        <include
+            layout="@layout/sudoku_cell"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cellVm="@{enterPuzzleVm.sudoku[safeUnbox(row)][4]}" />
+
+        <include
+            layout="@layout/sudoku_cell"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cellVm="@{enterPuzzleVm.sudoku[safeUnbox(row)][5]}" />
+
+        <View
+            android:layout_width="@dimen/halfRowBorder"
+            android:layout_height="match_parent"
+            android:background="@color/black" />
+
+        <include
+            layout="@layout/sudoku_cell"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cellVm="@{enterPuzzleVm.sudoku[safeUnbox(row)][6]}" />
+
+        <include
+            layout="@layout/sudoku_cell"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cellVm="@{enterPuzzleVm.sudoku[safeUnbox(row)][7]}" />
+
+        <include
+            layout="@layout/sudoku_cell"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:cellVm="@{enterPuzzleVm.sudoku[safeUnbox(row)][8]}" />
+
+    </TableRow>
+</layout>

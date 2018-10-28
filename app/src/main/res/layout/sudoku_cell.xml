@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="cellVm"
+            type="com.allanrodriguez.sudokusolver.viewmodels.CellViewModel" />
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:padding="@dimen/quarterRowBorder">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@{safeUnbox(cellVm.isDuplicate) ? @color/warningYellowBackground : @color/white}"
+            tools:background="@color/white">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/transparent"
+                android:ems="1"
+                android:hint="@string/empty"
+                android:imeOptions="actionNext"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:maxLength="1"
+                android:padding="0dp"
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                android:text="@={cellVm.cellValue}"
+                android:textAlignment="center"
+                android:textColor="@{safeUnbox(cellVm.wasValueSetByUser) ? @color/black : @color/dangerRedText}"
+                android:textSize="24sp"
+                tools:text="1" />
+        </FrameLayout>
+    </FrameLayout>
+</layout>
