@@ -6,11 +6,16 @@
     </string>
 
     <string name="title_activity_main">MainActivity</string>
+    <string name="title_fragment_camera_dialog">Find sudoku</string>
 
+    <string name="action_about">About</string>
+    <string name="action_clear">Clear puzzle</string>
     <string name="action_enter_puzzle">Enter puzzle</string>
     <string name="action_history">History</string>
     <string name="action_settings">Settings</string>
     <string name="action_solve">Solve</string>
 
     <string name="empty"> </string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

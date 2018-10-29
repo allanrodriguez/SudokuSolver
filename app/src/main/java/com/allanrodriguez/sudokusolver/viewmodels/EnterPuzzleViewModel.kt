@@ -5,4 +5,8 @@ import androidx.lifecycle.ViewModel
 class EnterPuzzleViewModel : ViewModel() {
 
     val sudoku: Array<Array<CellViewModel>> = Array(9) { _ -> Array(9) { _ -> CellViewModel() } }
+
+    fun clear() {
+        sudoku.forEach { row -> row.forEach { cell -> cell.clear() } }
+    }
 }

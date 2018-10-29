@@ -10,13 +10,13 @@ import androidx.lifecycle.ViewModelProviders
 import com.allanrodriguez.sudokusolver.R
 import com.allanrodriguez.sudokusolver.databinding.FragmentEnterPuzzleBinding
 import com.allanrodriguez.sudokusolver.viewmodels.EnterPuzzleViewModel
-import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_enter_puzzle.*
 
 class EnterPuzzleFragment : Fragment() {
 
     companion object {
+        const val TAG: String = "ENTER_PUZZLE_FRAGMENT"
         fun newInstance() = EnterPuzzleFragment()
     }
 
@@ -37,15 +37,9 @@ class EnterPuzzleFragment : Fragment() {
         binding.enterPuzzleVm = viewModel
 
         button_solve.setOnClickListener { view ->
-            val snackbar: Snackbar = Snackbar.make(view, "Replace with your own action", BaseTransientBottomBar.LENGTH_LONG)
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null)
-//            val snackbarView: View = snackbar.view
-//            val params: CoordinatorLayout.LayoutParams = snackbarView.layoutParams as CoordinatorLayout.LayoutParams
-
-//            params.setMargins(params.leftMargin, params.topMargin, params.rightMargin, params.bottomMargin + 50)
-//            snackbarView.layoutParams = params
-
-            snackbar.show()
+                    .show()
         }
     }
 }

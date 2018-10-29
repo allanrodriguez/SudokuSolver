@@ -8,9 +8,11 @@ class CellViewModel {
     var wasValueSetByUser: MutableLiveData<Boolean> = MutableLiveData()
     var isDuplicate: MutableLiveData<Boolean> = MutableLiveData()
 
-    init {
-        wasValueSetByUser.value = true
+    init { clear() }
+
+    fun clear() {
         cellValue.value = ""
         isDuplicate.value = false
+        wasValueSetByUser.value = true
     }
 }
