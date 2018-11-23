@@ -29,12 +29,12 @@ class Cell(override val row: Int, override val col: Int) : ICell {
         }
     //endregion
 
-    constructor(originalCell: ICell) : this(originalCell.row, originalCell.col) {
+    private constructor(originalCell: ICell) : this(originalCell.row, originalCell.col) {
         if (originalCell.value > 0) {
             value = originalCell.value
         } else {
             for (i: Int in possibleValues.indices) {
-                possibleValues[i] = originalCell.isPossible(i)
+                possibleValues[i] = originalCell.isPossibleValue(i + 1)
             }
             possibleSize = originalCell.possibleSize
         }
@@ -44,17 +44,19 @@ class Cell(override val row: Int, override val col: Int) : ICell {
         onCellValueSetListeners.add(listener)
     }
 
+    override fun copy(): ICell = Cell(this)
+
     override fun clear() {
         value = 0
     }
 
-    override fun isPossible(number: Int): Boolean {
-        return possibleValues[number]
+    override fun isPossibleValue(number: Int): Boolean {
+        return possibleValues[number - 1]
     }
 
     override fun possibleEquals(cell: ICell): Boolean {
         for (i: Int in possibleValues.indices) {
-            if (possibleValues[i] != cell.isPossible(i)) {
+            if (possibleValues[i] != cell.isPossibleValue(i + 1)) {
                 return false
             }
         }
@@ -68,12 +70,14 @@ class Cell(override val row: Int, override val col: Int) : ICell {
         }
     }
 
-    override fun removePossible(number: Int): Boolean {
-        if (value > 0 || !possibleValues[number]) {
+    override fun removePossibleValue(number: Int): Boolean {
+        val zeroIndexedNumber: Int = number - 1
+
+        if (value > 0 || !possibleValues[zeroIndexedNumber]) {
             return false
         }
 
-        possibleValues[number] = false
+        possibleValues[zeroIndexedNumber] = false
         --possibleSize
 
         if (possibleSize == 1) {

@@ -65,8 +65,8 @@ class CellTests {
         cell.value = 4
 
         // Assert
-        for (i: Int in 0..8) {
-            assertFalse(cell.isPossible(i))
+        for (i: Int in 1..9) {
+            assertFalse(cell.isPossibleValue(i))
         }
     }
 
@@ -115,7 +115,7 @@ class CellTests {
         cell.value = 4
 
         // Act
-        val removePossibleResult: Boolean = cell.removePossible(2)
+        val removePossibleResult: Boolean = cell.removePossibleValue(2)
 
         // Assert
         assertFalse(removePossibleResult)
@@ -125,10 +125,10 @@ class CellTests {
     fun `removePossible returns false when number specified is not a possible value`() {
         // Arrange
         val cell = Cell(0, 0)
-        cell.removePossible(2)
+        cell.removePossibleValue(2)
 
         // Act
-        val removePossibleResult: Boolean = cell.removePossible(2)
+        val removePossibleResult: Boolean = cell.removePossibleValue(2)
 
         // Assert
         assertFalse(removePossibleResult)
@@ -140,7 +140,7 @@ class CellTests {
         val cell = Cell(0, 0)
 
         // Act
-        val removePossibleResult: Boolean = cell.removePossible(2)
+        val removePossibleResult: Boolean = cell.removePossibleValue(2)
 
         // Assert
         assertTrue(removePossibleResult)
@@ -152,9 +152,9 @@ class CellTests {
         val cell = Cell(0, 0)
 
         // Act
-        cell.removePossible(2)
+        cell.removePossibleValue(2)
 
-        val is2StillAPossibleValue: Boolean = cell.isPossible(2)
+        val is2StillAPossibleValue: Boolean = cell.isPossibleValue(2)
 
         // Assert
         assertFalse(is2StillAPossibleValue)
@@ -166,8 +166,8 @@ class CellTests {
         val cell = Cell(0, 0)
 
         // Act
-        for (i: Int in 1..8) {
-            cell.removePossible(i)
+        for (i: Int in 2..9) {
+            cell.removePossibleValue(i)
         }
 
         // Assert
