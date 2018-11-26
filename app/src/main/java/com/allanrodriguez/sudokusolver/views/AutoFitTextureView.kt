@@ -23,12 +23,22 @@ class AutoFitTextureView : TextureView {
         val width: Int = MeasureSpec.getSize(widthMeasureSpec)
         val height: Int = MeasureSpec.getSize(heightMeasureSpec)
 
-        if (ratioWidth == 0 || ratioHeight == 0) {
+        var ratio = 0.0
+        if (ratioHeight > 0) {
+            ratio = ratioWidth.toDouble() / ratioHeight
+        }
+
+        var widthHeight = 0.0
+        if (height > 0) {
+            widthHeight = width.toDouble() / height
+        }
+
+        if (ratio == 0.0 || ratio == widthHeight) {
             setMeasuredDimension(width, height)
-        } else if (width < height * ratioWidth / ratioHeight) {
-            setMeasuredDimension(width, width * ratioHeight / ratioWidth)
+        } else if (ratio < widthHeight) {
+            setMeasuredDimension(width, (width * ratioHeight.toDouble() / ratioWidth).toInt())
         } else {
-            setMeasuredDimension(height * ratioWidth / ratioHeight, height)
+            setMeasuredDimension((height * ratioWidth.toDouble() / ratioHeight).toInt(), height)
         }
     }
 

@@ -1,8 +1,10 @@
 package com.allanrodriguez.sudokusolver.fragments
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.*
+import android.graphics.drawable.ColorDrawable
 import android.hardware.camera2.*
 import android.hardware.camera2.params.StreamConfigurationMap
 import android.media.Image
@@ -14,6 +16,9 @@ import android.util.Log
 import android.util.Size
 import android.util.SparseIntArray
 import android.view.*
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
@@ -85,6 +90,22 @@ class CameraDialogFragment : DialogFragment() {
 
         camera_dialog_toolbar.setNavigationOnClickListener { closeDialog() }
 
+        button_take_picture.setOnClickListener {
+            button_take_picture.isClickable = false
+            takePicture()
+        }
+
+        button_accept.setOnClickListener {
+            Log.d(tag, "(${camera_window.x}, ${camera_window.y})")
+            Log.d(tag, "(${camera_preview.x}, ${camera_preview.y})")
+        }
+        button_retake.setOnClickListener {
+            unlockFocus()
+            brightenScreens()
+            camera_directions.visibility = VISIBLE
+            showTakePictureButton()
+        }
+
         file = File(context?.cacheDir, "sudoku.jpg")
     }
 
@@ -106,9 +127,33 @@ class CameraDialogFragment : DialogFragment() {
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
+
+        if (file.exists()) {
+            Log.d(tag, "Deleting file...")
+            file.delete()
+            Log.d(tag, "File deleted...")
+        }
+
         super.onPause()
     }
     //endregion
+
+    private fun brightenScreens() {
+        val from: Int = ContextCompat.getColor(context as Context, R.color.black)
+        val to: Int = ContextCompat.getColor(context as Context, R.color.transparent_black)
+
+        val colorTransition: ValueAnimator = ValueAnimator.ofArgb(from, to)
+        colorTransition.duration = 250
+        colorTransition.addUpdateListener {
+            val color = ColorDrawable(it.animatedValue as Int)
+
+            top_screen.background = color
+            left_screen.background = color
+            right_screen.background = color
+            bottom_screen.background = color
+        }
+        colorTransition.start()
+    }
 
     private fun captureStillPicture() {
         try {
@@ -132,8 +177,12 @@ class CameraDialogFragment : DialogFragment() {
             val captureCallback = object : CameraCaptureSession.CaptureCallback() {
                 override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
                     Log.d(tag, "Saved image to file at $file")
-                    unlockFocus()
-                    // TODO: Maybe close the fragment here?
+
+                    activity.runOnUiThread {
+                        camera_directions.visibility = INVISIBLE
+                        darkenScreens()
+                        showAcceptRetakeButtons()
+                    }
                 }
             }
 
@@ -230,7 +279,8 @@ class CameraDialogFragment : DialogFragment() {
         val rotation: Int = activity.windowManager.defaultDisplay.rotation
         val matrix = Matrix()
         val viewRect = RectF(0f, 0f, viewWidth.toFloat(), viewHeight.toFloat())
-        val bufferRect = RectF(0f, 0f, previewSize?.height?.toFloat() as Float, previewSize?.width?.toFloat() as Float)
+        val bufferRect = RectF(0f, 0f,
+                previewSize?.height?.toFloat() as Float, previewSize?.width?.toFloat() as Float)
         val centerX: Float = viewRect.centerX()
         val centerY: Float = viewRect.centerY()
 
@@ -270,6 +320,23 @@ class CameraDialogFragment : DialogFragment() {
         } catch (ex: CameraAccessException) {
             ex.printStackTrace()
         }
+    }
+
+    private fun darkenScreens() {
+        val from: Int = ContextCompat.getColor(context as Context, R.color.transparent_black)
+        val to: Int = ContextCompat.getColor(context as Context, R.color.black)
+
+        val colorTransition: ValueAnimator = ValueAnimator.ofArgb(from, to)
+        colorTransition.duration = 250
+        colorTransition.addUpdateListener {
+            val color = ColorDrawable(it.animatedValue as Int)
+
+            top_screen.background = color
+            left_screen.background = color
+            right_screen.background = color
+            bottom_screen.background = color
+        }
+        colorTransition.start()
     }
 
     private fun getOrientation(rotation: Int): Int {
@@ -416,6 +483,19 @@ class CameraDialogFragment : DialogFragment() {
             // device this code runs.
             // TODO: Show error dialog
         }
+    }
+
+    private fun showAcceptRetakeButtons() {
+        button_take_picture.hide()
+        button_retake.show()
+        button_accept.show()
+    }
+
+    private fun showTakePictureButton() {
+        button_retake.hide()
+        button_accept.hide()
+        button_take_picture.isClickable = true
+        button_take_picture.show()
     }
 
     private fun startBackgroundThread() {

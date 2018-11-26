@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">Resolvedor de sudoku</string>
+
+    <string name="title_activity_main">@string/app_name</string>
+    <string name="title_fragment_camera_dialog">Buscar sudoku</string>
+
+    <string name="header_camera_directions">
+        Posicione el sudoku dentro del cuadro y tome una foto.
+    </string>
+
+    <string name="action_about">Acerca</string>
+    <string name="action_clear">Limpiar sudoku</string>
+    <string name="action_dismiss">Despedir</string>
+    <string name="action_enter_puzzle">Ingresar sudoku</string>
+    <string name="action_history">Historial</string>
+    <string name="action_settings">Configurar</string>
+    <string name="action_solve">Resolver</string>
+
+    <string name="text_clear_sudoku">
+        Está segur@ que quiere limpiar el sudoku?
+    </string>
+    <string name="text_sudoku_cleared">
+        El sudoku fue limpiado.
+    </string>
+
+    <string name="empty"> </string>
+    <string name="yes">Sí</string>
+    <string name="no">No</string>
+</resources>

@@ -22,7 +22,7 @@
         style="@style/Widget.MaterialComponents.FloatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_photo_camera_black_24dp"
+        android:src="@drawable/ic_photo_camera_white_24dp"
         app:backgroundTint="@color/black"
         app:fabSize="normal"
         app:layout_anchor="@id/toolbar" />

@@ -1,7 +1,6 @@
 package com.allanrodriguez.sudokusolver.activities
 
 import android.Manifest
-import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -27,20 +26,6 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
     private val tag: String = "MainActivity"
     private val cameraDialogTag = "CameraDialogFragment"
     private val navDrawer: BottomNavigationDrawerFragment = BottomNavigationDrawerFragment.newInstance()
-    private val onClearActionClicked = fun (_: DialogInterface, which: Int) {
-        when (which) {
-            DialogInterface.BUTTON_POSITIVE -> {
-                val fragment: Fragment = supportFragmentManager.findFragmentByTag(EnterPuzzleFragment.TAG) as Fragment
-                val enterPuzzleVm: EnterPuzzleViewModel = ViewModelProviders.of(fragment).get(EnterPuzzleViewModel::class.java)
-                enterPuzzleVm.clear()
-
-                val snackbar: Snackbar = Snackbar.make(toolbar, "Sudoku puzzle was cleared", Snackbar.LENGTH_LONG)
-                snackbar
-                        .setAction("Dismiss") { snackbar.dismiss() }
-                        .show()
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,9 +63,17 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
             android.R.id.home -> navDrawer.show(supportFragmentManager, navDrawer.tag)
             R.id.action_clear -> {
                 AlertDialog.Builder(this)
-                        .setMessage("Are you sure you want to clear the sudoku puzzle?")
-                        .setPositiveButton(R.string.yes, onClearActionClicked)
-                        .setNegativeButton(R.string.no, onClearActionClicked)
+                        .setMessage(R.string.text_clear_sudoku)
+                        .setPositiveButton(R.string.yes) { _, _ ->
+                            val fragment: Fragment = supportFragmentManager.findFragmentByTag(EnterPuzzleFragment.TAG) as Fragment
+                            val enterPuzzleVm: EnterPuzzleViewModel = ViewModelProviders.of(fragment).get(EnterPuzzleViewModel::class.java)
+                            enterPuzzleVm.clear()
+
+                            Snackbar.make(toolbar, R.string.text_sudoku_cleared, Snackbar.LENGTH_LONG)
+                                    .setAction(R.string.action_dismiss) { }
+                                    .show()
+                        }
+                        .setNegativeButton(R.string.no, null)
                         .show()
             }
             R.id.action_settings -> return true
