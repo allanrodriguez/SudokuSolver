@@ -18,8 +18,8 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@{safeUnbox(cellVm.isDuplicate) ? @color/warningYellowBackground : @color/white}"
-            tools:background="@color/white">
+            android:background="@{safeUnbox(cellVm.isDuplicate) ? @color/warningYellowBackground : @color/windowBackground}"
+            tools:background="?android:attr/windowBackground">
 
             <EditText
                 android:layout_width="match_parent"

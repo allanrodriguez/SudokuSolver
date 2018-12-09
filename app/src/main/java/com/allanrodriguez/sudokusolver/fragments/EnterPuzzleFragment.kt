@@ -16,7 +16,6 @@ import kotlinx.android.synthetic.main.fragment_enter_puzzle.*
 class EnterPuzzleFragment : Fragment() {
 
     companion object {
-        const val TAG: String = "ENTER_PUZZLE_FRAGMENT"
         fun newInstance() = EnterPuzzleFragment()
     }
 

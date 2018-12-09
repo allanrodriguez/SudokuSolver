@@ -12,8 +12,10 @@
     <color name="successGreenText">#155724</color>
     <color name="red">#CE2029</color>
     <color name="transparent">#00FFFFFF</color>
-    <color name="transparent_black">#80000000</color>
+    <color name="lessTransparentBlack">#C0000000</color>
+    <color name="transparentBlack">#80000000</color>
     <color name="warningYellowBackground">#FFF3CD</color>
+    <color name="windowBackground">#FAFAFA</color>
     <color name="white">#FFFFFF</color>
     <color name="yellow">#FFFF00</color>
 </resources>

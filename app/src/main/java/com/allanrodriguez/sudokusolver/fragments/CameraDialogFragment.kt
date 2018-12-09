@@ -20,6 +20,7 @@ import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProviders
 import com.allanrodriguez.sudokusolver.R
@@ -38,10 +39,6 @@ import kotlinx.android.synthetic.main.fragment_camera_dialog.*
 
 class CameraDialogFragment : DialogFragment() {
 
-    companion object {
-        fun newInstance() = CameraDialogFragment()
-    }
-
     //region Properties
     private val maxPreviewWidth: Int = 1920
     private val maxPreviewHeight: Int = 1080
@@ -59,6 +56,7 @@ class CameraDialogFragment : DialogFragment() {
     private var sensorOrientation: Int = 0
     private var state: CameraState = CameraState.PREVIEW
     private var textureView: AutoFitTextureView? = null
+    private var isImagePreviewShowing = false
 
     private lateinit var file: File
     private lateinit var previewRequest: CaptureRequest
@@ -96,17 +94,38 @@ class CameraDialogFragment : DialogFragment() {
         }
 
         button_accept.setOnClickListener {
-            Log.d(tag, "(${camera_window.x}, ${camera_window.y})")
-            Log.d(tag, "(${camera_preview.x}, ${camera_preview.y})")
+            val imageRect = Rect(camera_preview.left, camera_preview.top, camera_preview.right, camera_preview.bottom)
+            val squareRect = Rect(camera_window.left, camera_window.top, camera_window.right, camera_window.bottom)
+
+            val fragment: Fragment = ParseOcrFragment.newInstance(file, imageRect, squareRect)
+
+            closeDialog()
+
+            fragmentManager?.beginTransaction()
+                    ?.setCustomAnimations(R.anim.fade_in,
+                            R.anim.fade_out,
+                            R.anim.fade_in,
+                            R.anim.fade_out)
+                    ?.add(android.R.id.content, fragment, ParseOcrFragment::class.java.simpleName)
+                    ?.addToBackStack(null)
+                    ?.commit()
         }
-        button_retake.setOnClickListener {
-            unlockFocus()
-            brightenScreens()
-            camera_directions.visibility = VISIBLE
-            showTakePictureButton()
-        }
+        button_retake.setOnClickListener { cancelImagePreview() }
 
         file = File(context?.cacheDir, "sudoku.jpg")
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        if (resources.getBoolean(R.bool.large_layout)) {
+            context?.resources?.displayMetrics?.let {
+                val width: Int = (it.widthPixels * 0.75).toInt()
+                val height: Int = (it.heightPixels * 0.75).toInt()
+
+                dialog.window?.setLayout(width, height)
+            }
+        }
     }
 
     override fun onResume() {
@@ -122,17 +141,15 @@ class CameraDialogFragment : DialogFragment() {
         } else {
             textureView?.surfaceTextureListener = surfaceTextureListener
         }
+
+        if (isImagePreviewShowing) {
+            cancelImagePreview()
+        }
     }
 
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
-
-        if (file.exists()) {
-            Log.d(tag, "Deleting file...")
-            file.delete()
-            Log.d(tag, "File deleted...")
-        }
 
         super.onPause()
     }
@@ -140,19 +157,29 @@ class CameraDialogFragment : DialogFragment() {
 
     private fun brightenScreens() {
         val from: Int = ContextCompat.getColor(context as Context, R.color.black)
-        val to: Int = ContextCompat.getColor(context as Context, R.color.transparent_black)
+        val to: Int = ContextCompat.getColor(context as Context, R.color.transparentBlack)
 
-        val colorTransition: ValueAnimator = ValueAnimator.ofArgb(from, to)
-        colorTransition.duration = 250
-        colorTransition.addUpdateListener {
-            val color = ColorDrawable(it.animatedValue as Int)
+        val colorTransition: ValueAnimator = ValueAnimator.ofArgb(from, to).apply {
+            duration = 250
+            addUpdateListener {
+                val color = ColorDrawable(it.animatedValue as Int)
 
-            top_screen.background = color
-            left_screen.background = color
-            right_screen.background = color
-            bottom_screen.background = color
+                top_screen.background = color
+                left_screen.background = color
+                right_screen.background = color
+                bottom_screen.background = color
+            }
         }
+
         colorTransition.start()
+    }
+
+    private fun cancelImagePreview() {
+        unlockFocus()
+        brightenScreens()
+        camera_directions.visibility = VISIBLE
+        showTakePictureButton()
+        isImagePreviewShowing = false
     }
 
     private fun captureStillPicture() {
@@ -177,6 +204,8 @@ class CameraDialogFragment : DialogFragment() {
             val captureCallback = object : CameraCaptureSession.CaptureCallback() {
                 override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
                     Log.d(tag, "Saved image to file at $file")
+
+                    isImagePreviewShowing = true
 
                     activity.runOnUiThread {
                         camera_directions.visibility = INVISIBLE
@@ -266,7 +295,11 @@ class CameraDialogFragment : DialogFragment() {
     }
 
     private fun closeDialog() {
-        fragmentManager?.popBackStack()
+        if (resources.getBoolean(R.bool.large_layout)) {
+            dismiss()
+        } else {
+            fragmentManager?.popBackStack()
+        }
     }
 
     private fun configureTransform(viewWidth: Int, viewHeight: Int) {
@@ -323,18 +356,19 @@ class CameraDialogFragment : DialogFragment() {
     }
 
     private fun darkenScreens() {
-        val from: Int = ContextCompat.getColor(context as Context, R.color.transparent_black)
+        val from: Int = ContextCompat.getColor(context as Context, R.color.transparentBlack)
         val to: Int = ContextCompat.getColor(context as Context, R.color.black)
 
-        val colorTransition: ValueAnimator = ValueAnimator.ofArgb(from, to)
-        colorTransition.duration = 250
-        colorTransition.addUpdateListener {
-            val color = ColorDrawable(it.animatedValue as Int)
+        val colorTransition: ValueAnimator = ValueAnimator.ofArgb(from, to).apply {
+            duration = 250
+            addUpdateListener {
+                val color = ColorDrawable(it.animatedValue as Int)
 
-            top_screen.background = color
-            left_screen.background = color
-            right_screen.background = color
-            bottom_screen.background = color
+                top_screen.background = color
+                left_screen.background = color
+                right_screen.background = color
+                bottom_screen.background = color
+            }
         }
         colorTransition.start()
     }
@@ -652,20 +686,13 @@ class CameraDialogFragment : DialogFragment() {
 
             buffer.get(bytes)
 
-            var output: FileOutputStream? = null
-            try {
-                output = FileOutputStream(file)
-                output.write(bytes)
-            } catch (ex: IOException) {
-                ex.printStackTrace()
-            } finally {
-                image.close()
-                if (output != null) {
-                    try {
-                        output.close()
-                    } catch (ex: IOException) {
-                        ex.printStackTrace()
-                    }
+            FileOutputStream(file).use {
+                try {
+                    it.write(bytes)
+                } catch (ex: IOException) {
+                    ex.printStackTrace()
+                } finally {
+                    image.close()
                 }
             }
         }
@@ -688,6 +715,10 @@ class CameraDialogFragment : DialogFragment() {
         }
     }
     //endregion
+
+    companion object {
+        fun newInstance() = CameraDialogFragment()
+    }
 
     private class CompareSizesByArea : Comparator<Size> {
 

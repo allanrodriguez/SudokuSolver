@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/licorice"
     android:clickable="true"
     android:focusable="true"
     tools:context=".fragments.CameraDialogFragment">
@@ -25,7 +26,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/my_appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <com.allanrodriguez.sudokusolver.views.AutoFitTextureView
             android:id="@+id/camera_preview"
@@ -40,7 +41,7 @@
             android:id="@+id/top_screen"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@color/transparent_black"
+            android:background="@color/transparentBlack"
             app:layout_constraintBottom_toTopOf="@+id/camera_window"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -59,7 +60,7 @@
             android:id="@+id/left_screen"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@color/transparent_black"
+            android:background="@color/transparentBlack"
             app:layout_constraintBottom_toTopOf="@id/bottom_screen"
             app:layout_constraintEnd_toStartOf="@id/left_border"
             app:layout_constraintStart_toStartOf="parent"
@@ -100,7 +101,7 @@
             android:id="@+id/right_screen"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@color/transparent_black"
+            android:background="@color/transparentBlack"
             app:layout_constraintBottom_toTopOf="@id/bottom_screen"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/right_border"
@@ -119,7 +120,7 @@
             android:id="@+id/bottom_screen"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@color/transparent_black"
+            android:background="@color/transparentBlack"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

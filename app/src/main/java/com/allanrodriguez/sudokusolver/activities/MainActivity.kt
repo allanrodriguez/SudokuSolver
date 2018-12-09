@@ -18,26 +18,30 @@ import com.allanrodriguez.sudokusolver.fragments.BottomNavigationDrawerFragment
 import com.allanrodriguez.sudokusolver.fragments.CameraDialogFragment
 import com.allanrodriguez.sudokusolver.fragments.EnterPuzzleFragment
 import com.allanrodriguez.sudokusolver.viewmodels.EnterPuzzleViewModel
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsResultCallback {
 
-    private val tag: String = "MainActivity"
-    private val cameraDialogTag = "CameraDialogFragment"
     private val navDrawer: BottomNavigationDrawerFragment = BottomNavigationDrawerFragment.newInstance()
+    private val tag: String = "MainActivity"
+
+    private var isLargeLayout = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+        isLargeLayout = resources.getBoolean(R.bool.large_layout)
+
         if (savedInstanceState == null) {
             try {
                 val fragment: EnterPuzzleFragment = EnterPuzzleFragment.newInstance()
                 supportFragmentManager
                         .beginTransaction()
-                        .replace(R.id.content_main, fragment, EnterPuzzleFragment.TAG)
+                        .replace(R.id.content_main, fragment, EnterPuzzleFragment::class.java.simpleName)
                         .commit()
             } catch (ex: IllegalAccessException) {
                 Log.e(tag, ex.localizedMessage)
@@ -46,7 +50,13 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
             }
         }
 
-        fab.setOnClickListener { launchCameraDialog() }
+        fab.setOnClickListener {
+            if (it is FloatingActionButton) {
+                it.isClickable = false
+                launchCameraDialog()
+                it.isClickable = true
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -65,8 +75,10 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
                 AlertDialog.Builder(this)
                         .setMessage(R.string.text_clear_sudoku)
                         .setPositiveButton(R.string.yes) { _, _ ->
-                            val fragment: Fragment = supportFragmentManager.findFragmentByTag(EnterPuzzleFragment.TAG) as Fragment
-                            val enterPuzzleVm: EnterPuzzleViewModel = ViewModelProviders.of(fragment).get(EnterPuzzleViewModel::class.java)
+                            val fragment: Fragment =
+                                    supportFragmentManager.findFragmentByTag(EnterPuzzleFragment::class.java.simpleName) as Fragment
+                            val enterPuzzleVm: EnterPuzzleViewModel =
+                                    ViewModelProviders.of(fragment).get(EnterPuzzleViewModel::class.java)
                             enterPuzzleVm.clear()
 
                             Snackbar.make(toolbar, R.string.text_sudoku_cleared, Snackbar.LENGTH_LONG)
@@ -99,16 +111,7 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
             ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     == PackageManager.PERMISSION_GRANTED -> {
                 Log.i(tag, "Camera permission was granted.")
-                val dialog: CameraDialogFragment = CameraDialogFragment.newInstance()
-                supportFragmentManager
-                        .beginTransaction()
-                        .setCustomAnimations(R.anim.slide_up,
-                                R.anim.slide_down,
-                                R.anim.slide_up,
-                                R.anim.slide_down)
-                        .add(android.R.id.content, dialog, cameraDialogTag)
-                        .addToBackStack(null)
-                        .commit()
+                showCameraDialog()
             }
             ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.CAMERA) -> {
@@ -129,6 +132,24 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
                         arrayOf(Manifest.permission.CAMERA),
                         MY_PERMISSIONS_REQUEST_CAMERA)
             }
+        }
+    }
+
+    private fun showCameraDialog() {
+        val dialog: CameraDialogFragment = CameraDialogFragment.newInstance()
+
+        if (isLargeLayout) {
+            dialog.show(supportFragmentManager, CameraDialogFragment::class.java.simpleName)
+        } else {
+            supportFragmentManager
+                    .beginTransaction()
+                    .setCustomAnimations(R.anim.slide_up,
+                            R.anim.slide_down,
+                            R.anim.slide_up,
+                            R.anim.slide_down)
+                    .add(android.R.id.content, dialog, CameraDialogFragment::class.java.simpleName)
+                    .addToBackStack(null)
+                    .commit()
         }
     }
 }
