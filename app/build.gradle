@@ -43,6 +43,11 @@ android {
             jniLibs.srcDirs = [ 'jniLibs' ]
         }
     }
+    splits {
+        abi {
+            enable true
+        }
+    }
 }
 
 dependencies {

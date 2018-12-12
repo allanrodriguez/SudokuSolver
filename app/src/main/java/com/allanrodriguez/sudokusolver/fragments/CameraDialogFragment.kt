@@ -57,6 +57,7 @@ class CameraDialogFragment : DialogFragment() {
     private var state: CameraState = CameraState.PREVIEW
     private var textureView: AutoFitTextureView? = null
     private var isImagePreviewShowing = false
+    private var isLargeLayout = false
 
     private lateinit var file: File
     private lateinit var previewRequest: CaptureRequest
@@ -72,6 +73,11 @@ class CameraDialogFragment : DialogFragment() {
     }
 
     //region Lifecycle methods
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        isLargeLayout = resources.getBoolean(R.bool.large_layout)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_camera_dialog, container, false)
@@ -118,7 +124,7 @@ class CameraDialogFragment : DialogFragment() {
     override fun onStart() {
         super.onStart()
 
-        if (resources.getBoolean(R.bool.large_layout)) {
+        if (isLargeLayout) {
             context?.resources?.displayMetrics?.let {
                 val width: Int = (it.widthPixels * 0.75).toInt()
                 val height: Int = (it.heightPixels * 0.75).toInt()
@@ -295,7 +301,7 @@ class CameraDialogFragment : DialogFragment() {
     }
 
     private fun closeDialog() {
-        if (resources.getBoolean(R.bool.large_layout)) {
+        if (isLargeLayout) {
             dismiss()
         } else {
             fragmentManager?.popBackStack()
