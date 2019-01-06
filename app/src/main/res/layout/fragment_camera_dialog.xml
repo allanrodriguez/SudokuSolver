@@ -37,6 +37,14 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <ImageView
+            android:id="@+id/image_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@string/description_image_preview"
+            android:scaleType="centerCrop"
+            android:visibility="invisible" />
+
         <View
             android:id="@+id/top_screen"
             android:layout_width="0dp"
@@ -182,6 +190,16 @@
             app:layout_constraintEnd_toEndOf="@+id/bottom_screen"
             app:layout_constraintHorizontal_bias="0.67"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/bottom_screen" />
+
+        <com.allanrodriguez.sudokusolver.views.FlashButton
+            android:id="@+id/button_flash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/description_flash_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/right_screen"
+            app:layout_constraintStart_toEndOf="@+id/button_take_picture"
             app:layout_constraintTop_toTopOf="@+id/bottom_screen" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

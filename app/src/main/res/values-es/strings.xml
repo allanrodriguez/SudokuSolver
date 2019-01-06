@@ -8,6 +8,13 @@
         Posicione el sudoku dentro del cuadro y tome una foto.
     </string>
 
+    <string name="description_image_preview">
+        Cuando es visible, muestra la foto que se ha tomado. Cuando es invisible, muestra la transmisión de la cámara.
+    </string>
+    <string name="description_flash_button">
+        Enciende y apaga el flash de la cámara si hay uno disponible.
+    </string>
+
     <string name="action_about">Acerca</string>
     <string name="action_clear">Limpiar sudoku</string>
     <string name="action_dismiss">Despedir</string>
@@ -16,14 +23,18 @@
     <string name="action_settings">Configurar</string>
     <string name="action_solve">Resolver</string>
 
+    <string name="text_camera_error">
+        Un error con la cámara ha ocurrido.
+    </string>
     <string name="text_clear_sudoku">
-        Está segur@ que quiere limpiar el sudoku?
+        Desea limpiar el sudoku?
     </string>
     <string name="text_sudoku_cleared">
         El sudoku fue limpiado.
     </string>
 
     <string name="empty"> </string>
+    <string name="error">Error</string>
     <string name="yes">Sí</string>
     <string name="no">No</string>
 </resources>

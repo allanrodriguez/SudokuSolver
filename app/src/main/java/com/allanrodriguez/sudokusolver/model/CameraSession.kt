@@ -18,6 +18,7 @@ import android.view.TextureView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import com.allanrodriguez.sudokusolver.abstractions.FlashState
 import com.allanrodriguez.sudokusolver.views.AutoFitTextureView
 import java.io.File
 import java.io.FileOutputStream
@@ -29,29 +30,44 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.sign
 
-class CameraSession(private val activity: Activity, private val textureView: AutoFitTextureView) : LifecycleObserver {
+class CameraSession(
+    private val activity: Activity,
+    private val lifecycle: Lifecycle,
+    private val textureView: AutoFitTextureView) : LifecycleObserver {
 
     //region Properties
+    val file: File = File(activity.cacheDir, "sudoku.jpg")
+
     private val cameraOpenCloseLock: Semaphore = Semaphore(1)
-    private val file: File = File(activity.cacheDir, "sudoku.jpg")
     private val maxPreviewWidth: Int = 1920
     private val maxPreviewHeight: Int = 1080
+    private val onErrorListeners: MutableList<() -> Unit> = mutableListOf()
+    private val onFlashSupportChangedListeners: MutableList<(Boolean) -> Unit> = mutableListOf()
+    private val onPictureAvailableListeners: MutableList<() -> Unit> = mutableListOf()
     private val orientations: SparseIntArray = SparseIntArray()
     private val tag: String = "CameraSession"
-
-    private lateinit var cameraId: String
-    private lateinit var previewRequest: CaptureRequest
-    private lateinit var previewRequestBuilder: CaptureRequest.Builder
-    private lateinit var previewSize: Size
 
     private var backgroundHandler: Handler? = null
     private var backgroundThread: HandlerThread? = null
     private var cameraCaptureSession: CameraCaptureSession? = null
     private var cameraDevice: CameraDevice? = null
     private var imageReader: ImageReader? = null
+
     private var isFlashSupported: Boolean = false
+        private set(value) {
+            if (field != value) {
+                field = value
+                onFlashSupportChanged()
+            }
+        }
+
     private var sensorOrientation: Int = 0
     private var state: CameraState = CameraState.PREVIEW
+
+    private lateinit var cameraId: String
+    private lateinit var previewRequest: CaptureRequest
+    private lateinit var previewRequestBuilder: CaptureRequest.Builder
+    private lateinit var previewSize: Size
     //endregion
 
     init {
@@ -84,6 +100,64 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
     }
     //endregion
 
+    fun addOnErrorListener(listener: () -> Unit) {
+        if (!onErrorListeners.contains(listener)) {
+            onErrorListeners.add(listener)
+        }
+    }
+
+    fun removeOnErrorListener(listener: () -> Unit): Boolean {
+        return onErrorListeners.remove(listener)
+    }
+
+    fun addOnFlashSupportChangedListener(listener: (Boolean) -> Unit) {
+        if (!onFlashSupportChangedListeners.contains(listener)) {
+            onFlashSupportChangedListeners.add(listener)
+        }
+    }
+
+    fun removeOnFlashSupportChangedListener(listener: (Boolean) -> Unit): Boolean {
+        return onFlashSupportChangedListeners.remove(listener)
+    }
+
+    fun addOnPictureAvailableListener(listener: () -> Unit) {
+        if (!onPictureAvailableListeners.contains(listener)) {
+            onPictureAvailableListeners.add(listener)
+        }
+    }
+
+    fun removeOnPictureAvailableListener(listener: () -> Unit): Boolean {
+        return onPictureAvailableListeners.remove(listener)
+    }
+
+    fun deletePicture(): Boolean {
+        if (file.exists()) {
+            return file.delete()
+        }
+
+        return false
+    }
+
+    fun setFlash(flashState: FlashState): Boolean {
+        if (!(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) && isFlashSupported)) {
+            return false
+        }
+
+        previewRequestBuilder[CaptureRequest.CONTROL_AE_MODE] = when (flashState) {
+            FlashState.OFF -> CaptureRequest.CONTROL_AE_MODE_ON
+            FlashState.ON -> CaptureRequest.CONTROL_AE_MODE_ON_ALWAYS_FLASH
+            FlashState.AUTO -> CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH
+        }
+
+        return true
+    }
+
+    fun takePicture() {
+        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            lockFocus()
+        }
+    }
+
     private fun captureStillPicture() {
         try {
             if (cameraDevice == null) {
@@ -106,6 +180,7 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
             val captureCallback = object : CameraCaptureSession.CaptureCallback() {
                 override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
                     Log.d(tag, "Saved image to file at $file")
+                    onPictureAvailable()
                     unlockFocus()
                 }
             }
@@ -322,6 +397,24 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
         }
     }
 
+    private fun onError() {
+        for (listener: () -> Unit in onErrorListeners) {
+            listener()
+        }
+    }
+
+    private fun onFlashSupportChanged() {
+        for (listener: (Boolean) -> Unit in onFlashSupportChangedListeners) {
+            listener(isFlashSupported)
+        }
+    }
+
+    private fun onPictureAvailable() {
+        for (listener: () -> Unit in onPictureAvailableListeners) {
+            listener()
+        }
+    }
+
     private fun runPrecaptureSequence() {
         try {
             // This is how to tell the camera to trigger.
@@ -429,7 +522,7 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
         } catch (ex: NullPointerException) {
             // Currently an NPE is thrown when the Camera2API is used but not supported on the
             // device this code runs.
-            // TODO: Show error dialog
+            onError()
         }
     }
 
@@ -448,10 +541,6 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
         } catch (ex: InterruptedException) {
             ex.printStackTrace()
         }
-    }
-
-    fun takePicture() {
-        lockFocus()
     }
 
     //region Helper classes
@@ -524,8 +613,6 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
                 // Auto focus should be continuous for camera preview.
                 previewRequestBuilder[CaptureRequest.CONTROL_AF_MODE] = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
 
-                // TODO: Add flash support here.
-
                 // Finally, we start displaying the camera preview.
                 previewRequest = previewRequestBuilder.build()
                 cameraCaptureSession?.setRepeatingRequest(
@@ -539,8 +626,8 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
         }
 
         override fun onConfigureFailed(session: CameraCaptureSession) {
-            // TODO: Show error dialog.
             Log.e(tag, "CameraCaptureSession configuration failed.")
+            onError()
         }
     }
 
@@ -557,9 +644,8 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
             cameraOpenCloseLock.release()
             camera.close()
             cameraDevice = null
-//            closeDialog()
-            // TODO: Show error dialog here.
-            Log.e(tag, "An error occurred with the CameraDevice.")
+            Log.e(tag, "An error occurred with the CameraDevice.: $error")
+            onError()
         }
 
         override fun onOpened(camera: CameraDevice) {
