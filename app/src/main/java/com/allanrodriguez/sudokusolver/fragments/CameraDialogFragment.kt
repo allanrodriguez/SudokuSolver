@@ -24,6 +24,7 @@ class CameraDialogFragment : DialogFragment() {
     private lateinit var cameraSession: CameraSession
     private lateinit var textureView: AutoFitTextureView
 
+    private var isFlashSupported = false
     private var isImagePreviewShowing = false
     private var isLargeLayout = false
     //endregion
@@ -45,6 +46,8 @@ class CameraDialogFragment : DialogFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        dialog.setCanceledOnTouchOutside(false)
 
         camera_dialog_toolbar.setNavigationOnClickListener {
             closeDialog()
@@ -85,12 +88,11 @@ class CameraDialogFragment : DialogFragment() {
     override fun onStart() {
         super.onStart()
 
-        cameraSession = CameraSession(activity as Activity, lifecycle, textureView).apply {
+        cameraSession = CameraSession(activity as Activity, textureView).apply {
             addOnErrorListener(::onError)
             addOnFlashSupportChangedListener(::onFlashSupportChanged)
             addOnPictureAvailableListener(::onPictureAvailable)
         }
-        lifecycle.addObserver(cameraSession)
 
         if (isLargeLayout) {
             context?.resources?.displayMetrics?.let {
@@ -102,10 +104,23 @@ class CameraDialogFragment : DialogFragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        cameraSession.start()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        if (!cameraSession.isStopped) {
+            cameraSession.stop()
+        }
+    }
+
     override fun onStop() {
         super.onStop()
 
-        lifecycle.removeObserver(cameraSession)
         cameraSession.removeOnErrorListener(::onError)
         cameraSession.removeOnPictureAvailableListener(::onPictureAvailable)
         cameraSession.removeOnFlashSupportChangedListener(::onFlashSupportChanged)
@@ -151,6 +166,8 @@ class CameraDialogFragment : DialogFragment() {
     }
 
     private fun closeDialog() {
+        cameraSession.stop()
+
         if (isLargeLayout) {
             dismiss()
         } else {
@@ -177,15 +194,19 @@ class CameraDialogFragment : DialogFragment() {
     }
 
     private fun onError() {
-        closeDialog()
-        AlertDialog.Builder(context!!)
+        val dialog: AlertDialog.Builder = AlertDialog.Builder(context!!)
             .setTitle(R.string.error)
             .setMessage(R.string.text_camera_error)
             .setPositiveButton(android.R.string.ok, null)
-            .show()
+
+        activity?.runOnUiThread {
+            closeDialog()
+            dialog.show()
+        }
     }
 
     private fun onFlashSupportChanged(isFlashSupported: Boolean) {
+        this.isFlashSupported = isFlashSupported
         activity?.runOnUiThread {
             button_flash.visibility = if (isFlashSupported) VISIBLE else GONE
         }
@@ -197,6 +218,7 @@ class CameraDialogFragment : DialogFragment() {
 
     private fun showAcceptRetakeButtons() {
         button_take_picture.hide()
+        button_flash.visibility = GONE
         button_retake.show()
         button_accept.show()
     }
@@ -206,6 +228,10 @@ class CameraDialogFragment : DialogFragment() {
         button_accept.hide()
         button_take_picture.isClickable = true
         button_take_picture.show()
+
+        if (isFlashSupported) {
+            button_flash.visibility = VISIBLE
+        }
     }
 
     companion object {

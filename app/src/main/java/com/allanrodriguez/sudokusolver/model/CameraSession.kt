@@ -15,14 +15,9 @@ import android.util.Size
 import android.util.SparseIntArray
 import android.view.Surface
 import android.view.TextureView
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
 import com.allanrodriguez.sudokusolver.abstractions.FlashState
 import com.allanrodriguez.sudokusolver.views.AutoFitTextureView
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io.*
 import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.Semaphore
@@ -30,13 +25,13 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.sign
 
-class CameraSession(
-    private val activity: Activity,
-    private val lifecycle: Lifecycle,
-    private val textureView: AutoFitTextureView) : LifecycleObserver {
+class CameraSession(private val activity: Activity, private val textureView: AutoFitTextureView) {
 
     //region Properties
     val file: File = File(activity.cacheDir, "sudoku.jpg")
+
+    var isStopped = false
+        private set
 
     private val cameraOpenCloseLock: Semaphore = Semaphore(1)
     private val maxPreviewWidth: Int = 1920
@@ -45,7 +40,6 @@ class CameraSession(
     private val onFlashSupportChangedListeners: MutableList<(Boolean) -> Unit> = mutableListOf()
     private val onPictureAvailableListeners: MutableList<() -> Unit> = mutableListOf()
     private val orientations: SparseIntArray = SparseIntArray()
-    private val tag: String = "CameraSession"
 
     private var backgroundHandler: Handler? = null
     private var backgroundThread: HandlerThread? = null
@@ -77,29 +71,6 @@ class CameraSession(
         orientations.append(Surface.ROTATION_270, 180)
     }
 
-    //region Lifecycle events
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    fun onResume() {
-        startBackgroundThread()
-
-        // When the screen is turned off and turned back on, the SurfaceTexture is already
-        // available, and "onSurfaceTextureAvailable" will not be called. In that case, we can open
-        // a camera and start preview from here (otherwise, we wait until the surface is ready in
-        // the SurfaceTextureListener).
-        if (textureView.isAvailable) {
-            openCamera(textureView.width, textureView.height)
-        } else {
-            textureView.surfaceTextureListener = SurfaceTextureListener()
-        }
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    fun onPause() {
-        closeCamera()
-        stopBackgroundThread()
-    }
-    //endregion
-
     fun addOnErrorListener(listener: () -> Unit) {
         if (!onErrorListeners.contains(listener)) {
             onErrorListeners.add(listener)
@@ -130,6 +101,28 @@ class CameraSession(
         return onPictureAvailableListeners.remove(listener)
     }
 
+    fun start() {
+        startBackgroundThread()
+
+        // When the screen is turned off and turned back on, the SurfaceTexture is already
+        // available, and "onSurfaceTextureAvailable" will not be called. In that case, we can open
+        // a camera and start preview from here (otherwise, we wait until the surface is ready in
+        // the SurfaceTextureListener).
+        if (textureView.isAvailable) {
+            openCamera(textureView.width, textureView.height)
+        } else {
+            textureView.surfaceTextureListener = SurfaceTextureListener()
+        }
+
+        isStopped = false
+    }
+
+    fun stop() {
+        closeCamera()
+        stopBackgroundThread()
+        isStopped = true
+    }
+
     fun deletePicture(): Boolean {
         if (file.exists()) {
             return file.delete()
@@ -139,7 +132,7 @@ class CameraSession(
     }
 
     fun setFlash(flashState: FlashState): Boolean {
-        if (!(lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED) && isFlashSupported)) {
+        if (isFlashSupported) {
             return false
         }
 
@@ -153,9 +146,7 @@ class CameraSession(
     }
 
     fun takePicture() {
-        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-            lockFocus()
-        }
+        lockFocus()
     }
 
     private fun captureStillPicture() {
@@ -165,10 +156,10 @@ class CameraSession(
             }
 
             // This is the CaptureRequest.Builder that we use to take a picture.
-            val captureBuilder: CaptureRequest.Builder
-                    = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)!!.apply {
-                addTarget(imageReader?.surface as Surface)
-            }
+            val captureBuilder: CaptureRequest.Builder =
+                cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)!!.apply {
+                    addTarget(imageReader?.surface as Surface)
+                }
 
             // Use the same AE and AF modes as the preview.
             captureBuilder[CaptureRequest.CONTROL_AF_MODE] = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
@@ -178,8 +169,12 @@ class CameraSession(
             captureBuilder[CaptureRequest.JPEG_ORIENTATION] = getOrientation(rotation)
 
             val captureCallback = object : CameraCaptureSession.CaptureCallback() {
-                override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
-                    Log.d(tag, "Saved image to file at $file")
+                override fun onCaptureCompleted(
+                    session: CameraCaptureSession,
+                    request: CaptureRequest,
+                    result: TotalCaptureResult
+                ) {
+                    Log.d(TAG, "Saved image to file at $file")
                     onPictureAvailable()
                     unlockFocus()
                 }
@@ -189,7 +184,7 @@ class CameraSession(
             cameraCaptureSession?.abortCaptures()
             cameraCaptureSession?.capture(captureBuilder.build(), captureCallback, null)
         } catch (ex: CameraAccessException) {
-            ex.printStackTrace()
+            logStackTrace(ex)
         }
     }
 
@@ -215,7 +210,8 @@ class CameraSession(
         textureViewHeight: Int,
         maxWidth: Int,
         maxHeight: Int,
-        aspectRatio: Size): Size {
+        aspectRatio: Size
+    ): Size {
         // Collect the supported resolutions that are at least as big as the preview Surface
         val bigEnough: MutableList<Size> = mutableListOf()
 
@@ -240,7 +236,7 @@ class CameraSession(
         when {
             bigEnough.isNotEmpty() -> return Collections.min(bigEnough, CompareSizesByArea())
             notBigEnough.isNotEmpty() -> return Collections.max(notBigEnough, CompareSizesByArea())
-            else -> Log.e(tag, "Couldn't find any suitable preview size.")
+            else -> Log.e(TAG, "Couldn't find any suitable preview size.")
         }
 
         return choices[0]
@@ -259,7 +255,7 @@ class CameraSession(
 
             cameraManager.openCamera(cameraId, CameraDeviceStateCallback(), backgroundHandler)
         } catch (ex: CameraAccessException) {
-            ex.printStackTrace()
+            logStackTrace(ex)
         } catch (ex: InterruptedException) {
             throw RuntimeException("Interrupted while trying to lock camera opening.", ex)
         } catch (ex: SecurityException) {
@@ -300,8 +296,10 @@ class CameraSession(
             bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY())
             matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL)
 
-            val scale: Float = max(viewHeight.toFloat() / previewSize.height,
-                viewWidth.toFloat() / previewSize.width)
+            val scale: Float = max(
+                viewHeight.toFloat() / previewSize.height,
+                viewWidth.toFloat() / previewSize.width
+            )
 
             matrix.postScale(scale, scale, centerX, centerY)
             matrix.postRotate(90f * (rotation - 2f), centerX, centerY)
@@ -331,9 +329,10 @@ class CameraSession(
             cameraDevice?.createCaptureSession(
                 listOf(surface, imageReader?.surface),
                 CameraCaptureSessionStateCallback(),
-                null)
+                null
+            )
         } catch (ex: CameraAccessException) {
-            ex.printStackTrace()
+            logStackTrace(ex)
         }
     }
 
@@ -352,9 +351,10 @@ class CameraSession(
             cameraCaptureSession?.capture(
                 previewRequestBuilder.build(),
                 CameraCaptureSessionCaptureCallback(),
-                backgroundHandler)
+                backgroundHandler
+            )
         } catch (ex: CameraAccessException) {
-            ex.printStackTrace()
+            logStackTrace(ex)
         }
     }
 
@@ -364,17 +364,25 @@ class CameraSession(
             cameraCaptureSession?.capture(
                 previewRequestBuilder.build(),
                 CameraCaptureSessionCaptureCallback(),
-                backgroundHandler)
+                backgroundHandler
+            )
 
             // After this, the camera will go back to the normal state of preview.
             state = CameraState.PREVIEW
             cameraCaptureSession?.setRepeatingRequest(
                 previewRequest,
                 CameraCaptureSessionCaptureCallback(),
-                backgroundHandler)
+                backgroundHandler
+            )
         } catch (ex: CameraAccessException) {
-            ex.printStackTrace()
+            logStackTrace(ex)
         }
+    }
+
+    private fun logStackTrace(ex: Exception) {
+        val stackTrace = StringWriter()
+        ex.printStackTrace(PrintWriter(stackTrace))
+        Log.e(TAG, stackTrace.toString())
     }
 
     private fun onImageAvailable(reader: ImageReader) {
@@ -389,7 +397,7 @@ class CameraSession(
                 try {
                     it.write(bytes)
                 } catch (ex: IOException) {
-                    ex.printStackTrace()
+                    logStackTrace(ex)
                 } finally {
                     image.close()
                 }
@@ -418,16 +426,18 @@ class CameraSession(
     private fun runPrecaptureSequence() {
         try {
             // This is how to tell the camera to trigger.
-            previewRequestBuilder[CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER] = CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START
+            previewRequestBuilder[CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER] =
+                    CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START
 
             // Tell #captureSessionCaptureCallback to wait for the precapture sequence to be set.
             state = CameraState.WAITING_PRECAPTURE
             cameraCaptureSession?.capture(
                 previewRequestBuilder.build(),
                 CameraCaptureSessionCaptureCallback(),
-                backgroundHandler)
+                backgroundHandler
+            )
         } catch (ex: CameraAccessException) {
-            ex.printStackTrace()
+            logStackTrace(ex)
         }
     }
 
@@ -445,12 +455,12 @@ class CameraSession(
                     continue
                 }
 
-                val map: StreamConfigurationMap?
-                        = characteristics[CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP] ?: continue
+                val map: StreamConfigurationMap? =
+                    characteristics[CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP] ?: continue
 
                 // For still image captures, we use the largest available size.
-                val largest: Size
-                        = Collections.max(map?.getOutputSizes(ImageFormat.JPEG)?.toList(), CompareSizesByArea())
+                val largest: Size =
+                    Collections.max(map?.getOutputSizes(ImageFormat.JPEG)?.toList(), CompareSizesByArea())
                 imageReader = ImageReader.newInstance(largest.width, largest.height, ImageFormat.JPEG, 2).apply {
                     setOnImageAvailableListener(::onImageAvailable, backgroundHandler)
                 }
@@ -471,7 +481,7 @@ class CameraSession(
                             swappedDimensions = true
                         }
                     }
-                    else -> Log.e(tag, "Display rotation is invalid: $displayRotation")
+                    else -> Log.e(TAG, "Display rotation is invalid: $displayRotation")
                 }
 
                 val displaySize = Point()
@@ -503,7 +513,8 @@ class CameraSession(
                     rotatedPreviewHeight,
                     maxPreviewWidth,
                     maxPreviewHeight,
-                    largest)
+                    largest
+                )
 
                 val orientation: Int = activity.resources.configuration.orientation
                 if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -518,7 +529,7 @@ class CameraSession(
                 return
             }
         } catch (ex: CameraAccessException) {
-            ex.printStackTrace()
+            logStackTrace(ex)
         } catch (ex: NullPointerException) {
             // Currently an NPE is thrown when the Camera2API is used but not supported on the
             // device this code runs.
@@ -539,18 +550,26 @@ class CameraSession(
             backgroundThread = null
             backgroundHandler = null
         } catch (ex: InterruptedException) {
-            ex.printStackTrace()
+            logStackTrace(ex)
         }
     }
 
     //region Helper classes
     private inner class CameraCaptureSessionCaptureCallback : CameraCaptureSession.CaptureCallback() {
 
-        override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
+        override fun onCaptureCompleted(
+            session: CameraCaptureSession,
+            request: CaptureRequest,
+            result: TotalCaptureResult
+        ) {
             process(result)
         }
 
-        override fun onCaptureProgressed(session: CameraCaptureSession, request: CaptureRequest, partialResult: CaptureResult) {
+        override fun onCaptureProgressed(
+            session: CameraCaptureSession,
+            request: CaptureRequest,
+            partialResult: CaptureResult
+        ) {
             process(partialResult)
         }
 
@@ -565,7 +584,8 @@ class CameraSession(
                     if (afState == null) {
                         captureStillPicture()
                     } else if (afState == CaptureRequest.CONTROL_AF_STATE_FOCUSED_LOCKED
-                        || afState == CaptureRequest.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED) {
+                        || afState == CaptureRequest.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED
+                    ) {
                         // CONTROL_AE_STATE can be null on some devices
                         val aeState: Int? = result[CaptureResult.CONTROL_AE_STATE]
                         if (aeState == null || aeState == CaptureRequest.CONTROL_AE_STATE_CONVERGED) {
@@ -581,7 +601,8 @@ class CameraSession(
                     val aeState: Int? = result[CaptureResult.CONTROL_AE_STATE]
                     if (aeState == null
                         || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE
-                        || aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED) {
+                        || aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED
+                    ) {
                         state = CameraState.WAITING_NON_PRECAPTURE
                     }
                 }
@@ -611,22 +632,24 @@ class CameraSession(
 
             try {
                 // Auto focus should be continuous for camera preview.
-                previewRequestBuilder[CaptureRequest.CONTROL_AF_MODE] = CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
+                previewRequestBuilder[CaptureRequest.CONTROL_AF_MODE] =
+                        CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
 
                 // Finally, we start displaying the camera preview.
                 previewRequest = previewRequestBuilder.build()
                 cameraCaptureSession?.setRepeatingRequest(
                     previewRequest,
                     CameraCaptureSessionCaptureCallback(),
-                    backgroundHandler)
+                    backgroundHandler
+                )
             } catch (ex: CameraAccessException) {
-                ex.printStackTrace()
+                logStackTrace(ex)
             }
-            Log.i(tag, "CameraCaptureSession configured successfully.")
+            Log.i(TAG, "CameraCaptureSession configured successfully.")
         }
 
         override fun onConfigureFailed(session: CameraCaptureSession) {
-            Log.e(tag, "CameraCaptureSession configuration failed.")
+            Log.e(TAG, "CameraCaptureSession configuration failed.")
             onError()
         }
     }
@@ -637,14 +660,14 @@ class CameraSession(
             cameraOpenCloseLock.release()
             camera.close()
             cameraDevice = null
-            Log.i(tag, "CameraDevice was disconnected.")
+            Log.i(TAG, "CameraDevice was disconnected.")
         }
 
         override fun onError(camera: CameraDevice, error: Int) {
             cameraOpenCloseLock.release()
             camera.close()
             cameraDevice = null
-            Log.e(tag, "An error occurred with the CameraDevice.: $error")
+            Log.e(TAG, "An error occurred with the CameraDevice.: $error")
             onError()
         }
 
@@ -653,7 +676,7 @@ class CameraSession(
             cameraOpenCloseLock.release()
             cameraDevice = camera
             createCameraPreviewSession()
-            Log.i(tag, "CameraDevice was opened.")
+            Log.i(TAG, "CameraDevice was opened.")
         }
     }
 
@@ -692,4 +715,8 @@ class CameraSession(
         }
     }
     //endregion
+
+    companion object {
+        const val TAG = "CameraSession"
+    }
 }
