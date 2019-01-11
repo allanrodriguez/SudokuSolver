@@ -30,6 +30,13 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
     //region Properties
     val file: File = File(activity.cacheDir, "sudoku.jpg")
 
+    var isFlashSupported: Boolean = false
+        private set(value) {
+            if (field != value) {
+                field = value
+                onFlashSupportChanged()
+            }
+        }
     var isStopped = false
         private set
 
@@ -46,14 +53,6 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
     private var cameraCaptureSession: CameraCaptureSession? = null
     private var cameraDevice: CameraDevice? = null
     private var imageReader: ImageReader? = null
-
-    private var isFlashSupported: Boolean = false
-        private set(value) {
-            if (field != value) {
-                field = value
-                onFlashSupportChanged()
-            }
-        }
 
     private var sensorOrientation: Int = 0
     private var state: CameraState = CameraState.PREVIEW
@@ -711,8 +710,7 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
             configureTransform(width, height)
         }
 
-        override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
-        }
+        override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {}
     }
     //endregion
 

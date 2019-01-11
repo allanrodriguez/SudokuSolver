@@ -24,7 +24,6 @@ class CameraDialogFragment : DialogFragment() {
     private lateinit var cameraSession: CameraSession
     private lateinit var textureView: AutoFitTextureView
 
-    private var isFlashSupported = false
     private var isImagePreviewShowing = false
     private var isLargeLayout = false
     //endregion
@@ -206,7 +205,6 @@ class CameraDialogFragment : DialogFragment() {
     }
 
     private fun onFlashSupportChanged(isFlashSupported: Boolean) {
-        this.isFlashSupported = isFlashSupported
         activity?.runOnUiThread {
             button_flash.visibility = if (isFlashSupported) VISIBLE else GONE
         }
@@ -229,7 +227,7 @@ class CameraDialogFragment : DialogFragment() {
         button_take_picture.isClickable = true
         button_take_picture.show()
 
-        if (isFlashSupported) {
+        if (cameraSession.isFlashSupported) {
             button_flash.visibility = VISIBLE
         }
     }
