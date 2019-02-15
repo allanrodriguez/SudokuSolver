@@ -390,6 +390,8 @@ class CameraSession(private val activity: Activity, private val textureView: Aut
             val buffer: ByteBuffer = image.planes[0].buffer
             val bytes = ByteArray(buffer.remaining())
 
+            Log.d(TAG, "Image available with dimensions ${image.width}x${image.height}.")
+
             buffer.get(bytes)
 
             FileOutputStream(file).use {

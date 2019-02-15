@@ -16,29 +16,30 @@
         android:padding="@dimen/quarterRowBorder">
 
         <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@{safeUnbox(cellVm.isDuplicate) ? @color/warningYellowBackground : @color/windowBackground}"
-            tools:background="?android:attr/windowBackground">
-
-            <EditText
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/transparent"
-                android:ems="1"
-                android:hint="@string/empty"
-                android:imeOptions="actionNext"
-                android:importantForAutofill="no"
-                android:inputType="number"
-                android:maxLength="1"
-                android:padding="0dp"
-                android:selectAllOnFocus="true"
-                android:singleLine="true"
-                android:text="@={cellVm.cellValue}"
-                android:textAlignment="center"
-                android:textColor="@{safeUnbox(cellVm.wasValueSetByUser) ? @color/black : @color/dangerRedText}"
-                android:textSize="24sp"
-                tools:text="1" />
+                android:background="@{cellVm.isDuplicate == true ? @color/warningYellowBackground : @color/windowBackground}"
+                tools:background="?android:attr/windowBackground">
+
+            <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/transparent"
+                    android:ems="1"
+                    android:hint="@string/empty"
+                    android:imeOptions="actionNext"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:maxLength="1"
+                    android:onTextChanged="@{cellVm.onTextChanged}"
+                    android:padding="0dp"
+                    android:selectAllOnFocus="true"
+                    android:singleLine="true"
+                    android:text="@={cellVm.cellValue}"
+                    android:textAlignment="center"
+                    android:textColor="@{cellVm.wasValueSetByUser == true ? @color/black : @color/red}"
+                    android:textSize="24sp"
+                    tools:text="1"/>
         </FrameLayout>
     </FrameLayout>
 </layout>

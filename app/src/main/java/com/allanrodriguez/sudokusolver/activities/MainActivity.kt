@@ -50,11 +50,11 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
             }
         }
 
-        fab.setOnClickListener {
-            if (it is FloatingActionButton) {
-                it.isClickable = false
+        fab.setOnClickListener { view ->
+            if (view is FloatingActionButton) {
+                view.isClickable = false
                 launchCameraDialog()
-                it.isClickable = true
+                view.isClickable = true
             }
         }
     }
@@ -99,7 +99,8 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
 
         if (requestCode == MY_PERMISSIONS_REQUEST_CAMERA
                 && grantResults.isNotEmpty()
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
             launchCameraDialog()
         } else {
             Log.i(tag, "Camera permission was denied.")
@@ -113,24 +114,30 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
                 Log.i(tag, "Camera permission was granted.")
                 showCameraDialog()
             }
-            ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.CAMERA) -> {
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
+                    Manifest.permission.CAMERA
+            ) -> {
                 Log.i(tag, "Showing camera permission request rationale.")
                 AlertDialog.Builder(this)
                         .setTitle("Sudoku Solver needs permission to use your camera to read puzzles from pictures.")
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             Log.i(tag, "Requesting camera permission...")
-                            ActivityCompat.requestPermissions(this,
+                            ActivityCompat.requestPermissions(
+                                    this,
                                     arrayOf(Manifest.permission.CAMERA),
-                                    MY_PERMISSIONS_REQUEST_CAMERA)
+                                    MY_PERMISSIONS_REQUEST_CAMERA
+                            )
                         }
                         .show()
             }
             else -> {
                 Log.i(tag, "Requesting camera permission...")
-                ActivityCompat.requestPermissions(this,
+                ActivityCompat.requestPermissions(
+                        this,
                         arrayOf(Manifest.permission.CAMERA),
-                        MY_PERMISSIONS_REQUEST_CAMERA)
+                        MY_PERMISSIONS_REQUEST_CAMERA
+                )
             }
         }
     }
@@ -138,15 +145,18 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
     private fun showCameraDialog() {
         val dialog: CameraDialogFragment = CameraDialogFragment.newInstance()
 
+        // Show the camera dialog in a small pop-up window if app is run on a tablet.
         if (isLargeLayout) {
             dialog.show(supportFragmentManager, CameraDialogFragment::class.java.simpleName)
         } else {
             supportFragmentManager
                     .beginTransaction()
-                    .setCustomAnimations(R.anim.slide_up,
+                    .setCustomAnimations(
+                            R.anim.slide_up,
                             R.anim.slide_down,
                             R.anim.slide_up,
-                            R.anim.slide_down)
+                            R.anim.slide_down
+                    )
                     .add(android.R.id.content, dialog, CameraDialogFragment::class.java.simpleName)
                     .addToBackStack(null)
                     .commit()

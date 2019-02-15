@@ -32,6 +32,12 @@
     <string name="text_sudoku_cleared">
         El sudoku fue limpiado.
     </string>
+    <string name="text_sudoku_empty">
+        El sudoku está vacío.
+    </string>
+    <string name="text_sudoku_full">
+        No hay celdas para resolver.
+    </string>
 
     <string name="empty"> </string>
     <string name="error">Error</string>

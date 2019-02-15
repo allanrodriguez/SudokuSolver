@@ -1,1 +1,1 @@
-include ':app', ':libsudokusolverkt'
+include ':app', ':libsudokusolverkt', ':libbruteforcesudokusolver'

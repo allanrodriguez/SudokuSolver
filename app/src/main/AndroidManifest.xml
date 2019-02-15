@@ -16,9 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
         <activity
-            android:name=".activities.MainActivity"
-            android:label="@string/title_activity_main"
-            android:screenOrientation="sensorPortrait">
+                android:name=".activities.MainActivity"
+                android:label="@string/title_activity_main"
+                android:screenOrientation="sensorPortrait"
+                android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

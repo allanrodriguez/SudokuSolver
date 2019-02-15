@@ -1,106 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
         <variable
-            name="enterPuzzleVm"
-            type="com.allanrodriguez.sudokusolver.viewmodels.EnterPuzzleViewModel" />
+                name="enterPuzzleVm"
+                type="com.allanrodriguez.sudokusolver.viewmodels.EnterPuzzleViewModel"/>
     </data>
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/black"
-        android:padding="@dimen/outsideBorder">
-
-        <TableLayout
+    <TableLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@color/black"
+            android:padding="@dimen/outsideBorder">
 
-            <include
+        <include
                 layout="@layout/sudoku_row"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:enterPuzzleVm="@{enterPuzzleVm}"
-                app:row="@{0}" />
+                app:row="@{0}"/>
 
-            <include
+        <include
                 layout="@layout/sudoku_row"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:enterPuzzleVm="@{enterPuzzleVm}"
-                app:row="@{1}" />
+                app:row="@{1}"/>
 
-            <include
+        <include
                 layout="@layout/sudoku_row"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:enterPuzzleVm="@{enterPuzzleVm}"
-                app:row="@{2}" />
+                app:row="@{2}"/>
 
-            <View
+        <View
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/halfRowBorder"
-                android:background="@color/black" />
+                android:background="@color/black"/>
 
-            <include
+        <include
                 layout="@layout/sudoku_row"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:enterPuzzleVm="@{enterPuzzleVm}"
-                app:row="@{3}" />
+                app:row="@{3}"/>
 
-            <include
+        <include
                 layout="@layout/sudoku_row"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:enterPuzzleVm="@{enterPuzzleVm}"
-                app:row="@{4}" />
+                app:row="@{4}"/>
 
-            <include
+        <include
                 layout="@layout/sudoku_row"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:enterPuzzleVm="@{enterPuzzleVm}"
-                app:row="@{5}" />
+                app:row="@{5}"/>
 
-            <View
+        <View
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/halfRowBorder"
-                android:background="@color/black" />
+                android:background="@color/black"/>
 
-            <include
+        <include
                 layout="@layout/sudoku_row"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:enterPuzzleVm="@{enterPuzzleVm}"
-                app:row="@{6}" />
+                app:row="@{6}"/>
 
-            <include
+        <include
                 layout="@layout/sudoku_row"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:enterPuzzleVm="@{enterPuzzleVm}"
-                app:row="@{7}" />
+                app:row="@{7}"/>
 
-            <include
+        <include
                 layout="@layout/sudoku_row"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 app:enterPuzzleVm="@{enterPuzzleVm}"
-                app:row="@{8}" />
+                app:row="@{8}"/>
 
-        </TableLayout>
-    </FrameLayout>
+    </TableLayout>
 </layout>

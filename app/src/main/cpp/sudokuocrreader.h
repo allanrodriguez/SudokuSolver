@@ -1,9 +1,11 @@
 #ifndef SUDOKUSOLVER_SUDOKUOCRREADER_H
 #define SUDOKUSOLVER_SUDOKUOCRREADER_H
 
+#define SUDOKU_SIZE 9
+
 #include <array>
 #include <cstring>
-#include <exception>
+#include <utility>
 
 #ifdef DEBUG
 #include <sstream>
@@ -20,7 +22,7 @@
 #include <tesseract/baseapi.h>
 
 namespace SudokuSolver {
-    template <typename T>
+    template<typename T>
     struct Rectangle {
         T left;
         T top;
@@ -29,47 +31,49 @@ namespace SudokuSolver {
     };
 
     class SudokuOcrReader {
-
     public:
-        const char* k_name = "SudokuOcrReader";
+        const char *k_name = "SudokuOcrReader";
         const int k_num_iterations = 11;
         const double k_thresh = 50.0;
 
-        SudokuOcrReader(const char* path_to_image, const char* path_to_tessdata_parent);
-        SudokuOcrReader(const cv::Mat& image, const char* path_to_tessdata_parent);
+        SudokuOcrReader(const cv::Mat &image, const char *path_to_tessdata_parent);
 
         ~SudokuOcrReader();
 
-        bool parse_image(std::array<std::array<int, 9>, 9>& parsed_sudoku);
+        bool parse_image(
+                std::array<std::array<int, SUDOKU_SIZE>, SUDOKU_SIZE> &parsed_sudoku);
 
     private:
         cv::Mat _image;
-        const char* _path_to_image = NULL;
-        const char* _path_to_tessdata_parent = NULL;
+        cv::Size _image_size;
+        const char *_path_to_tessdata_parent = nullptr;
 
         inline double angle(cv::Point point1, cv::Point point2, cv::Point point0);
 
-        int best_candidate_for_cell(std::array<int, 10> candidates);
+        void find_squares(std::vector<std::vector<cv::Point> > &squares);
 
-        void find_squares(const cv::Mat& image, std::vector< std::vector<cv::Point> >& squares);
+        void generate_rectangle_vector(
+                const std::vector<std::vector<cv::Point> > &squares,
+                std::array<std::array<Rectangle<int>, SUDOKU_SIZE>, SUDOKU_SIZE>
+                &rectangles);
 
-        void generate_rectangle_vector(const std::vector< std::vector<cv::Point> >& squares,
-                                       std::vector< Rectangle<int> >& rectangles);
+        inline std::pair<int, int> get_coordinates(const Rectangle<int> &square);
 
-        inline void get_midpoint(const cv::Point& point1,
-                                 const cv::Point& point2,
-                                 cv::Point& midpoint);
+        inline void get_midpoint(const cv::Point &point1, const cv::Point &point2,
+                                 cv::Point &midpoint);
 
         inline bool is_digit(char c);
 
-        void parse_numbers_in_rectangles(const std::vector< Rectangle<int> >& squares,
-                                         PIX* image,
-                                         std::array<std::array<int, 9>, 9>& parsed_sudoku);
+        void parse_numbers_in_rectangles(
+                const std::array<std::array<Rectangle<int>, SUDOKU_SIZE>, SUDOKU_SIZE>
+                &squares,
+                PIX *image,
+                std::array<std::array<int, SUDOKU_SIZE>, SUDOKU_SIZE> &parsed_sudoku);
 
-        int parse_rectangle(char* rectangle_text);
+        int parse_rectangle(char *rectangle_text);
 
-        PIX* prepare_tesseract_image(cv::Mat& image);
+        PIX *prepare_tesseract_image(cv::Mat &image);
     };
-}
+}  // namespace SudokuSolver
 
 #endif
