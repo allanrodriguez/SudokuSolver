@@ -7,12 +7,16 @@
     <string name="header_camera_directions">
         Posicione el sudoku dentro del cuadro y tome una foto.
     </string>
+    <string name="header_licenses">Licencias</string>
 
     <string name="description_image_preview">
         Cuando es visible, muestra la foto que se ha tomado. Cuando es invisible, muestra la transmisión de la cámara.
     </string>
     <string name="description_flash_button">
         Enciende y apaga el flash de la cámara si hay uno disponible.
+    </string>
+    <string name="description_lots_of_love">
+        Creado con mucho amor por Allan Rodríguez ❤
     </string>
 
     <string name="action_about">Acerca</string>

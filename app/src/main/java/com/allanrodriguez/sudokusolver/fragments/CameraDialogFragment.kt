@@ -73,15 +73,15 @@ class CameraDialogFragment : DialogFragment() {
             closeDialog()
 
             fragmentManager?.beginTransaction()
-                ?.setCustomAnimations(
-                    R.anim.fade_in,
-                    R.anim.fade_out,
-                    R.anim.fade_in,
-                    R.anim.fade_out
-                )
-                ?.add(android.R.id.content, fragment, ParseOcrFragment::class.java.simpleName)
-                ?.addToBackStack(null)
-                ?.commit()
+                    ?.setCustomAnimations(
+                            R.anim.fade_in,
+                            R.anim.fade_out,
+                            R.anim.fade_in,
+                            R.anim.fade_out
+                    )
+                    ?.add(android.R.id.content, fragment, ParseOcrFragment::class.java.simpleName)
+                    ?.addToBackStack(null)
+                    ?.commit()
         }
 
         button_retake.setOnClickListener {
@@ -199,9 +199,9 @@ class CameraDialogFragment : DialogFragment() {
 
     private fun onError() {
         val dialog: AlertDialog.Builder = AlertDialog.Builder(context!!)
-            .setTitle(R.string.error)
-            .setMessage(R.string.text_camera_error)
-            .setPositiveButton(android.R.string.ok, null)
+                .setTitle(R.string.error)
+                .setMessage(R.string.text_camera_error)
+                .setPositiveButton(android.R.string.ok, null)
 
         activity?.runOnUiThread {
             closeDialog()
