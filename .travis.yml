@@ -11,6 +11,7 @@ android:
   - platform-tools
   - build-tools-$ANDROID_BUILD_TOOLS_VERSION
   - android-$ANDROID_API_LEVEL
+  - android-$EMULATOR_API_LEVEL
   - extra-google-google_play_services
   - extra-google-m2repository
   - extra-android-m2repository
