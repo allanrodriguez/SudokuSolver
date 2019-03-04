@@ -2,12 +2,13 @@ package com.allanrodriguez.sudokusolver.views
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.ImageButton
+import androidx.appcompat.widget.AppCompatImageButton 
 import androidx.core.content.ContextCompat
+
 import com.allanrodriguez.sudokusolver.R
 import com.allanrodriguez.sudokusolver.abstractions.FlashState
 
-class FlashButton : ImageButton {
+class FlashButton : AppCompatImageButton {
 
     //region Properties
     private var flashListener: FlashListener? = null
@@ -38,12 +39,6 @@ class FlashButton : ImageButton {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int, defStyleRes: Int) : super(
-        context,
-        attrs,
-        defStyleAttr,
-        defStyleRes
-    )
 
     init {
         setBackgroundColor(ContextCompat.getColor(context, R.color.transparent))
