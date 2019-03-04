@@ -13,7 +13,21 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
         tools:showIn="@layout/fragment_about_dialog">
+
+        <ImageView
+            android:id="@+id/expand_collapse_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:contentDescription="@string/description_expand_collapse_indicator"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_keyboard_arrow_down_black_24dp" />
 
         <TextView
             android:id="@+id/license_title"
@@ -25,8 +39,9 @@
             android:text="@{licenseVM.title}"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/expand_collapse_indicator"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="License" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

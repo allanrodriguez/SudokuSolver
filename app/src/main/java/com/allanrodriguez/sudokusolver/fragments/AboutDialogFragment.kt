@@ -2,17 +2,20 @@ package com.allanrodriguez.sudokusolver.fragments
 
 import android.content.Context
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.thoughtbot.expandablerecyclerview.models.ExpandableGroup
+import kotlinx.android.synthetic.main.fragment_about_dialog.*
 
 import com.allanrodriguez.sudokusolver.R
+import com.allanrodriguez.sudokusolver.abstractions.Licenses
 import com.allanrodriguez.sudokusolver.viewmodels.LicenseViewModel
 import com.allanrodriguez.sudokusolver.views.LicensesListAdapter
-import kotlinx.android.synthetic.main.fragment_about_dialog.*
 
 class AboutDialogFragment : DialogFragment() {
 
@@ -34,13 +37,29 @@ class AboutDialogFragment : DialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val arr: Array<LicenseViewModel> = arrayOf(
-                LicenseViewModel("Hello", "1"),
-                LicenseViewModel("Potato", "2")
+        source_code_message.movementMethod = LinkMovementMethod.getInstance()
+
+        val licenses: Array<LicenseViewModel> = arrayOf(
+                LicenseViewModel("Expandable RecyclerView", "Copyright 2016 Amanda Hill and thoughtbot, inc.\n\n${Licenses.MIT}"),
+                LicenseViewModel("Leptonica", "Copyright 2001 Leptonica\n\n${Licenses.BSD_2_CLAUSE}"),
+                LicenseViewModel("OpenCV", "Copyright 2000-2018, Intel Corporation, all rights reserved.\n" +
+                        "Copyright 2009-2011, Willow Garage Inc., all rights reserved.\n" +
+                        "Copyright 2009-2016, NVIDIA Corporation, all rights reserved.\n" +
+                        "Copyright 2010-2013, Advanced Micro Devices, Inc., all rights reserved.\n" +
+                        "Copyright 2015-2016, OpenCV Foundation, all rights reserved.\n" +
+                        "Copyright 2015-2016, Itseez Inc., all rights reserved.\n" +
+                        "Third party copyrights are property of their respective owners.\n\n${Licenses.BSD_3_CLAUSE}"),
+                LicenseViewModel("Tesseract", Licenses.APACHE_2_0)
         )
 
+        val groups: MutableList<ExpandableGroup<LicenseViewModel>> = mutableListOf()
+
+        for (viewModel: LicenseViewModel in licenses) {
+            groups.add(ExpandableGroup(viewModel.title, listOf(viewModel)))
+        }
+
         viewManager = LinearLayoutManager(context)
-        viewAdapter = LicensesListAdapter(arr)
+        viewAdapter = LicensesListAdapter(groups)
 
         licenses_list.setHasFixedSize(true)
         licenses_list.layoutManager = viewManager

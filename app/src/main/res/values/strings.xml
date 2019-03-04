@@ -10,6 +10,9 @@
     </string>
     <string name="header_licenses">Licenses</string>
 
+    <string name="description_expand_collapse_indicator">
+        Expands and collapses the list item.
+    </string>
     <string name="description_image_preview">
         When visible, shows the picture just taken. When invisible, shows the camera preview.
     </string>
@@ -18,6 +21,9 @@
     </string>
     <string name="description_lots_of_love">
         Created with lots of love by Allan Rodriguez ❤
+    </string>
+    <string name="description_source_code">
+        Source code for this app can be found on <a href="https://github.com/allanrodriguez/SudokuSolver">GitHub</a>!
     </string>
 
     <string name="action_about">About</string>
