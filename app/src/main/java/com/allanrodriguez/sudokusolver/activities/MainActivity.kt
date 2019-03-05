@@ -10,10 +10,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+
 import com.allanrodriguez.sudokusolver.R
 import com.allanrodriguez.sudokusolver.abstractions.MY_PERMISSIONS_REQUEST_CAMERA
+import com.allanrodriguez.sudokusolver.fragments.AboutDialogFragment
 import com.allanrodriguez.sudokusolver.fragments.BottomNavigationDrawerFragment
 import com.allanrodriguez.sudokusolver.fragments.CameraDialogFragment
 import com.allanrodriguez.sudokusolver.fragments.EnterPuzzleFragment
@@ -71,6 +74,10 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
         // as you specify a parent activity in AndroidManifest.xml.
         when (item.itemId) {
             android.R.id.home -> navDrawer.show(supportFragmentManager, navDrawer.tag)
+            R.id.action_about -> {
+                val aboutDialogFragment: AboutDialogFragment = AboutDialogFragment.newInstance()
+                showDialogFragment(aboutDialogFragment)
+            }
             R.id.action_clear -> {
                 AlertDialog.Builder(this)
                         .setMessage(R.string.text_clear_sudoku)
@@ -112,7 +119,8 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
             ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     == PackageManager.PERMISSION_GRANTED -> {
                 Log.i(tag, "Camera permission was granted.")
-                showCameraDialog()
+                val cameraDialog: CameraDialogFragment = CameraDialogFragment.newInstance()
+                showDialogFragment(cameraDialog)
             }
             ActivityCompat.shouldShowRequestPermissionRationale(
                     this,
@@ -142,12 +150,10 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
         }
     }
 
-    private fun showCameraDialog() {
-        val dialog: CameraDialogFragment = CameraDialogFragment.newInstance()
-
-        // Show the camera dialog in a small pop-up window if app is run on a tablet.
+    private fun showDialogFragment(dialog: DialogFragment) {
+        // Show the dialog in a small pop-up window if app is run on a tablet.
         if (isLargeLayout) {
-            dialog.show(supportFragmentManager, CameraDialogFragment::class.java.simpleName)
+            dialog.show(supportFragmentManager, dialog::class.java.simpleName)
         } else {
             supportFragmentManager
                     .beginTransaction()
@@ -157,7 +163,7 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
                             R.anim.slide_up,
                             R.anim.slide_down
                     )
-                    .add(android.R.id.content, dialog, CameraDialogFragment::class.java.simpleName)
+                    .add(android.R.id.content, dialog, dialog::class.java.simpleName)
                     .addToBackStack(null)
                     .commit()
         }

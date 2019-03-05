@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Sudoku Solver</string>
+    <string name="version_name" translatable="false">1.0</string>
 
     <string name="title_activity_main">@string/app_name</string>
     <string name="title_fragment_camera_dialog">Find sudoku</string>
@@ -7,13 +8,22 @@
     <string name="header_camera_directions">
         Position the sudoku puzzle inside the square and take a picture.
     </string>
+    <string name="header_licenses">Licenses</string>
 
+    <string name="description_expand_collapse_indicator">
+        Expands and collapses the list item.
+    </string>
     <string name="description_image_preview">
         When visible, shows the picture just taken. When invisible, shows the camera preview.
     </string>
     <string name="description_flash_button">
         Toggles the camera flash, if available.
     </string>
+    <string name="description_lots_of_love">
+        Created with lots of love by Allan Rodriguez ❤
+    </string>
+    <!-- HTML needs to be in one line or else spaces appear at the beginning of the TextView it's used on. -->
+    <string name="description_source_code">Source code for this app can be found on <a href="https://github.com/allanrodriguez/SudokuSolver">GitHub</a>!</string>
 
     <string name="action_about">About</string>
     <string name="action_clear">Clear puzzle</string>

@@ -7,13 +7,22 @@
     <string name="header_camera_directions">
         Posicione el sudoku dentro del cuadro y tome una foto.
     </string>
+    <string name="header_licenses">Licencias</string>
 
+    <string name="description_expand_collapse_indicator">
+        Expande y contrae el elemento de la lista.
+    </string>
     <string name="description_image_preview">
         Cuando es visible, muestra la foto que se ha tomado. Cuando es invisible, muestra la transmisión de la cámara.
     </string>
     <string name="description_flash_button">
         Enciende y apaga el flash de la cámara si hay uno disponible.
     </string>
+    <string name="description_lots_of_love">
+        Creado con mucho amor por Allan Rodríguez ❤
+    </string>
+    <!-- HTML needs to be in one line or else spaces appear at the beginning of the TextView it's used on. -->
+    <string name="description_source_code">El código fuente de esta aplicación se encuentra en <a href="https://github.com/allanrodriguez/SudokuSolver">GitHub</a>!</string>
 
     <string name="action_about">Acerca</string>
     <string name="action_clear">Limpiar sudoku</string>
