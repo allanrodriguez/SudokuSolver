@@ -42,6 +42,7 @@ class AboutDialogFragment : DialogFragment() {
         val licenses: Array<LicenseViewModel> = arrayOf(
                 LicenseViewModel("Expandable RecyclerView", "Copyright 2016 Amanda Hill and thoughtbot, inc.\n\n${Licenses.MIT}"),
                 LicenseViewModel("Leptonica", "Copyright 2001 Leptonica\n\n${Licenses.BSD_2_CLAUSE}"),
+                LicenseViewModel("Material design icons", Licenses.APACHE_2_0),
                 LicenseViewModel("OpenCV", "Copyright 2000-2018, Intel Corporation, all rights reserved.\n" +
                         "Copyright 2009-2011, Willow Garage Inc., all rights reserved.\n" +
                         "Copyright 2009-2016, NVIDIA Corporation, all rights reserved.\n" +

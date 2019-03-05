@@ -21,9 +21,8 @@
     <string name="description_lots_of_love">
         Creado con mucho amor por Allan Rodríguez ❤
     </string>
-    <string name="description_source_code">
-        El código fuente de esta aplicación se encuentra en <a href="https://github.com/allanrodriguez/SudokuSolver">GitHub</a>!
-    </string>
+    <!-- HTML needs to be in one line or else spaces appear at the beginning of the TextView it's used on. -->
+    <string name="description_source_code">El código fuente de esta aplicación se encuentra en <a href="https://github.com/allanrodriguez/SudokuSolver">GitHub</a>!</string>
 
     <string name="action_about">Acerca</string>
     <string name="action_clear">Limpiar sudoku</string>
