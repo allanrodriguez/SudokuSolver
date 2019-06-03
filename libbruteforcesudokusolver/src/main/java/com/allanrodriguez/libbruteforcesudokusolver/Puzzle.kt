@@ -50,6 +50,22 @@ class Puzzle : IPuzzle {
         puzzle[location.first][location.second] = value
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other is Puzzle) {
+            for (i: Int in 0..8) {
+                for (j: Int in 0..8) {
+                    if (puzzle[i][j] != other[i, j]) {
+                        return false
+                    }
+                }
+            }
+
+            return true
+        }
+
+        return false
+    }
+
     override fun toString(): String {
         val sb = StringBuilder()
 

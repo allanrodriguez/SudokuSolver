@@ -30,6 +30,10 @@ class SudokuSolver(puzzle: Array<IntArray>) : ISudokuSolver {
     //endregion
 
     init {
+        if (puzzle.size != 9 || puzzle[0].size != 9) {
+            throw IllegalArgumentException("Puzzle array must be 9x9.")
+        }
+
         for (i: Int in 0..8) {
             for (j: Int in 0..8) {
                 val value: Int = puzzle[i][j]

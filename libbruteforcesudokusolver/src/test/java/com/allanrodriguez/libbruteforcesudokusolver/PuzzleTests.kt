@@ -243,6 +243,58 @@ class PuzzleTests {
     }
 
     @Test
+    fun `equals returns true when comparing two empty puzzles`() {
+        // Arrange
+        val puzzle1 = Puzzle()
+        val puzzle2 = Puzzle()
+
+        // Assert
+        Assertions.assertEquals(puzzle1, puzzle2)
+    }
+
+    @Test
+    fun `equals returns true when comparing two full puzzles`() {
+        // Arrange
+        val puzzle1 = Puzzle()
+        val puzzle2 = Puzzle()
+
+        for (i: Int in 0..8) {
+            for (j: Int in 0..8) {
+                puzzle1[i, j] = 1
+                puzzle2[i, j] = 1
+            }
+        }
+
+        // Assert
+        Assertions.assertEquals(puzzle1, puzzle2)
+    }
+
+    @Test
+    fun `equals returns false when comparing puzzles with different values`() {
+        // Arrange
+        val puzzle1 = Puzzle()
+        val puzzle2 = Puzzle()
+
+        puzzle1[0, 0] = 1
+        puzzle2[0, 0] = 2
+
+        // Assert
+        Assertions.assertNotEquals(puzzle1, puzzle2)
+    }
+
+    @Test
+    fun `equals returns false when comparing puzzle with object of a different type`() {
+        // Arrange
+        val puzzle1 = Puzzle()
+        val puzzle2: Array<IntArray> = Array(9) {
+            IntArray(9)
+        }
+
+        // Assert
+        Assertions.assertNotEquals(puzzle1, puzzle2)
+    }
+
+    @Test
     fun `toString returns puzzle as string with all cells set to '_'`() {
         // Arrange
         val expectedPuzzleString: String =
