@@ -32,7 +32,7 @@ class CameraDialogFragment : DialogFragment() {
     //endregion
 
     //region Lifecycle methods
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         isLargeLayout = resources.getBoolean(R.bool.large_layout)
     }
@@ -50,7 +50,7 @@ class CameraDialogFragment : DialogFragment() {
         super.onActivityCreated(savedInstanceState)
 
         if (isLargeLayout) {
-            dialog.setCanceledOnTouchOutside(false)
+            dialog?.setCanceledOnTouchOutside(false)
         }
 
         camera_dialog_toolbar.setNavigationOnClickListener {
@@ -103,7 +103,7 @@ class CameraDialogFragment : DialogFragment() {
                 val width: Int = (it.widthPixels * 0.75).toInt()
                 val height: Int = (it.heightPixels * 0.75).toInt()
 
-                dialog.window?.setLayout(width, height)
+                dialog?.window?.setLayout(width, height)
             }
         }
     }

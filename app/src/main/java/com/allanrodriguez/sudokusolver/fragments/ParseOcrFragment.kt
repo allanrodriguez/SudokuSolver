@@ -21,13 +21,13 @@ import java.io.*
 
 class ParseOcrFragment : Fragment() {
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
 
         val image: Serializable? = arguments?.getSerializable(IMAGE)
         val imageRect: Rect? = arguments?.getParcelable(IMAGE_RECT)
         val squareRect: Rect? = arguments?.getParcelable(SQUARE_RECT)
-        val trainData = File(File(context?.cacheDir, "opencv"), TRAIN_DATA)
+        val trainData = File(File(context.cacheDir, "opencv"), TRAIN_DATA)
 
         if (image is File && imageRect != null && squareRect != null) {
             CoroutineScope(Dispatchers.Default).launch {

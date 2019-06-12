@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -88,8 +89,9 @@ class MainActivity : AppCompatActivity(), ActivityCompat.OnRequestPermissionsRes
                                     ViewModelProviders.of(fragment).get(EnterPuzzleViewModel::class.java)
                             enterPuzzleVm.clear()
 
-                            Snackbar.make(toolbar, R.string.text_sudoku_cleared, Snackbar.LENGTH_LONG)
+                            Snackbar.make(main_coordinatorLayout, R.string.text_sudoku_cleared, Snackbar.LENGTH_LONG)
                                     .setAction(R.string.action_dismiss) { }
+                                    .setAnchorView(if (fab.visibility == View.VISIBLE) fab else toolbar)
                                     .show()
                         }
                         .setNegativeButton(R.string.no, null)

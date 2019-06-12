@@ -27,10 +27,7 @@ class EnterPuzzleFragment : Fragment() {
     private lateinit var binding: FragmentEnterPuzzleBinding
     private lateinit var viewModel: EnterPuzzleViewModel
 
-    override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_enter_puzzle, container, false)
         binding.lifecycleOwner = this
 
@@ -70,7 +67,7 @@ class EnterPuzzleFragment : Fragment() {
         viewModel.showPuzzleFullDialog.observe(this, puzzleFullObserver)
 
         // Remove focus from puzzle EditTexts on click outside
-        puzzle_layout.setOnFocusChangeListener { v, hasFocus ->
+        sudoku_layout.setOnFocusChangeListener { v, hasFocus ->
             if (hasFocus) {
                 val imm: InputMethodManager =
                         context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
