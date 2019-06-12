@@ -17,28 +17,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
-import java.io.Serializable
+import java.io.*
 
 class ParseOcrFragment : Fragment() {
 
-    private val trainedData = "eng.traineddata"
-
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
 
         val image: Serializable? = arguments?.getSerializable(IMAGE)
         val imageRect: Rect? = arguments?.getParcelable(IMAGE_RECT)
         val squareRect: Rect? = arguments?.getParcelable(SQUARE_RECT)
-        val tessData = File(File(context?.cacheDir, "tessdata"), trainedData)
+        val trainData = File(File(context.cacheDir, "opencv"), TRAIN_DATA)
 
         if (image is File && imageRect != null && squareRect != null) {
             CoroutineScope(Dispatchers.Default).launch {
-                copyTessDataToCache(tessData)
-                val puzzle: Array<IntArray> =
-                        parseSudokuFromImage(cropImage(image, imageRect, squareRect), tessData.parentFile.absolutePath)
-                tessData.delete()
+                copyTrainDataToCache(trainData)
+                val puzzle = IntArray(81)
+                parseSudokuFromImage(cropImage(image, imageRect, squareRect), trainData.absolutePath, puzzle)
+                trainData.delete()
 
                 withContext(Dispatchers.Main) {
                     setOcrResultToPuzzle(puzzle)
@@ -63,21 +59,23 @@ class ParseOcrFragment : Fragment() {
         fragmentManager?.popBackStack()
     }
 
-    private fun copyTessDataToCache(tessData: File) {
-        val tessDataParent: File = tessData.parentFile
+    private fun copyTrainDataToCache(trainData: File) {
+        val parent: File = trainData.parentFile
 
-        Log.d(TAG, "Creating folder ${tessDataParent.absolutePath}...")
-        if (!(tessDataParent.mkdirs() || tessDataParent.exists())) {
-            Log.e(TAG, "tessdata directory was not created!")
+        Log.d(TAG, "Creating folder ${parent.absolutePath}...")
+        if (!(parent.mkdirs() || parent.exists())) {
+            Log.e(TAG, "opencv directory was not created!")
         }
-        Log.d(TAG, "tessdata directory created.")
+        Log.d(TAG, "opencv directory created.")
 
         val buffer = ByteArray(8192)
 
-        context?.assets?.open(trainedData)?.use { source ->
-            FileOutputStream(tessData).use { target ->
-                while (source.read(buffer) > 0) {
-                    target.write(buffer)
+        context?.assets?.open(TRAIN_DATA)?.use { source ->
+            FileOutputStream(trainData).use { target ->
+                var bytesRead: Int = source.read(buffer)
+                while (bytesRead > 0) {
+                    target.write(buffer, 0, bytesRead)
+                    bytesRead = source.read(buffer)
                 }
             }
         }
@@ -90,17 +88,17 @@ class ParseOcrFragment : Fragment() {
                 originalImage.height.toDouble() / imageRect.height()
         ).average()
 
-        val x: Int = (scalingFactor * squareRect.left).toInt() - 4
-        val y: Int = (scalingFactor * squareRect.top).toInt() - 4
-        val width: Int = (scalingFactor * squareRect.width()).toInt() + 4
-        val height: Int = (scalingFactor * squareRect.height()).toInt() + 4
+        val x: Int = (scalingFactor * squareRect.left).toInt()
+        val y: Int = (scalingFactor * squareRect.top).toInt()
+        val width: Int = (scalingFactor * squareRect.width()).toInt()
+        val height: Int = (scalingFactor * squareRect.height()).toInt()
 
         Log.d(TAG, "Bitmap dimensions are ($x, $y, $width, $height)")
 
         return Bitmap.createBitmap(originalImage, x, y, width, height)
     }
 
-    private fun setOcrResultToPuzzle(sudoku: Array<IntArray>) {
+    private fun setOcrResultToPuzzle(sudoku: IntArray) {
         Log.i(tag, "Copying parsed puzzle to the enter puzzle view-model...")
 
         val puzzleFragment: Fragment =
@@ -108,19 +106,17 @@ class ParseOcrFragment : Fragment() {
         val puzzleViewModel: EnterPuzzleViewModel =
                 ViewModelProviders.of(puzzleFragment).get(EnterPuzzleViewModel::class.java)
 
-        for (i: Int in 0..8) {
-            for (j: Int in 0..8) {
-                puzzleViewModel.sudoku[i][j].apply {
-                    wasValueSetByUser.value = false
-                    cellValue.value = if (sudoku[i][j] > 0) sudoku[i][j].toString() else ""
-                }
+        for (i: Int in 0 until 81) {
+            puzzleViewModel.sudoku[i / 9][i % 9].apply {
+                wasValueSetByUser.value = false
+                cellValue.value = if (sudoku[i] > 0) sudoku[i].toString() else ""
             }
         }
 
         Log.i(tag, "Done copying parsed puzzle to the enter puzzle view-model.")
     }
 
-    private external fun parseSudokuFromImage(image: Bitmap, pathToTrainedData: String): Array<IntArray>
+    private external fun parseSudokuFromImage(image: Bitmap, pathToTrainData: String, sudoku: IntArray)
 
     companion object {
         const val TAG: String = "ParseOcrFragment"
@@ -129,8 +125,10 @@ class ParseOcrFragment : Fragment() {
         private const val IMAGE_RECT: String = "IMAGE_RECT"
         private const val SQUARE_RECT: String = "SQUARE_RECT"
 
+        private const val TRAIN_DATA = "digits_svm.yml"
+
         init {
-            System.loadLibrary("parseocrjni")
+            System.loadLibrary("sudoku_ocr")
         }
 
         @JvmStatic

@@ -24,7 +24,7 @@ class AboutDialogFragment : DialogFragment() {
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
         isLargeLayout = resources.getBoolean(R.bool.large_layout)
     }
@@ -67,7 +67,7 @@ class AboutDialogFragment : DialogFragment() {
         licenses_list.adapter = viewAdapter
 
         if (isLargeLayout) {
-            dialog.setCanceledOnTouchOutside(false)
+            dialog?.setCanceledOnTouchOutside(false)
         }
 
         about_dialog_toolbar.setNavigationOnClickListener {
@@ -83,7 +83,7 @@ class AboutDialogFragment : DialogFragment() {
                 val width: Int = (it.widthPixels * 0.75).toInt()
                 val height: Int = (it.heightPixels * 0.75).toInt()
 
-                dialog.window?.setLayout(width, height)
+                dialog?.window?.setLayout(width, height)
             }
         }
     }
