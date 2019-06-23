@@ -4,14 +4,18 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.allanrodriguez.libbruteforcesudokusolver.abstractions.ISudokuSolver
+import com.allanrodriguez.sudokusolver.abstractions.IEnterPuzzleViewModel
 import com.allanrodriguez.sudokusolver.abstractions.ISudokuSolverFactory
 
-class EnterPuzzleViewModel(private val factory: ISudokuSolverFactory) : ViewModel() {
+class EnterPuzzleViewModel(private val factory: ISudokuSolverFactory) : ViewModel(), IEnterPuzzleViewModel {
 
-    val isSolving: MutableLiveData<Boolean> = MutableLiveData()
-    val showPuzzleEmptyDialog: MutableLiveData<Boolean> = MutableLiveData()
-    val showPuzzleFullDialog: MutableLiveData<Boolean> = MutableLiveData()
-    val sudoku: List<List<CellViewModel>> = List(9) { List(9) { CellViewModel() } }
+    override val isCameraButtonClickable: MutableLiveData<Boolean> = MutableLiveData()
+    override val isSolving: MutableLiveData<Boolean> = MutableLiveData()
+    override val showPuzzleEmptyDialog: MutableLiveData<Boolean> = MutableLiveData()
+    override val showPuzzleFullDialog: MutableLiveData<Boolean> = MutableLiveData()
+    override val sudoku: List<List<CellViewModel>> = List(9) { List(9) { CellViewModel() } }
+
+    private val cameraButtonClickListeners = mutableListOf<() -> Unit>()
 
     private val sudokuArray: Array<IntArray>
         get() {
@@ -25,12 +29,13 @@ class EnterPuzzleViewModel(private val factory: ISudokuSolverFactory) : ViewMode
         }
 
     init {
+        isCameraButtonClickable.value = true
         isSolving.value = false
         showPuzzleEmptyDialog.value = false
         showPuzzleFullDialog.value = false
     }
 
-    fun clear() {
+    override fun clear() {
         for (row: List<CellViewModel> in sudoku) {
             for (cell: CellViewModel in row) {
                 cell.clear()
@@ -38,7 +43,15 @@ class EnterPuzzleViewModel(private val factory: ISudokuSolverFactory) : ViewMode
         }
     }
 
-    fun onSolveButtonClick(view: View) {
+    override fun onCameraButtonClick(view: View) {
+        isCameraButtonClickable.value = false
+        for (l: () -> Unit in cameraButtonClickListeners) {
+            l()
+        }
+        isCameraButtonClickable.value = true
+    }
+
+    override fun onSolveButtonClick(view: View) {
         isSolving.value = true
         val sudokuSolver: ISudokuSolver = factory.newInstance(sudokuArray)
 
@@ -60,5 +73,15 @@ class EnterPuzzleViewModel(private val factory: ISudokuSolverFactory) : ViewMode
         }
 
         isSolving.value = false
+    }
+
+    override fun addCameraButtonClickListener(listener: () -> Unit) {
+        if (!cameraButtonClickListeners.contains(listener)) {
+            cameraButtonClickListeners.add(listener)
+        }
+    }
+
+    override fun removeCameraButtonClickListener(listener: () -> Unit): Boolean {
+        return cameraButtonClickListeners.remove(listener)
     }
 }

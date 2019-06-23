@@ -15,7 +15,7 @@
     <color name="lessTransparentBlack">#C0000000</color>
     <color name="transparentBlack">#80000000</color>
     <color name="warningYellowBackground">#FFF3CD</color>
-    <color name="windowBackground">#FAFAFA</color>
+    <color name="windowBackground">@color/colorPrimary</color>
     <color name="white">#FFFFFF</color>
     <color name="yellow">#FFFF00</color>
 </resources>
