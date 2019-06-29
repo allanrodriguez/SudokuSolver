@@ -2,6 +2,7 @@ package com.allanrodriguez.sudokusolver.fragments
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -17,9 +18,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.allanrodriguez.sudokusolver.R
 import com.allanrodriguez.sudokusolver.abstractions.MY_PERMISSIONS_REQUEST_CAMERA
+import com.allanrodriguez.sudokusolver.activities.CameraActivity
 import com.allanrodriguez.sudokusolver.databinding.FragmentEnterPuzzleBinding
 import com.allanrodriguez.sudokusolver.factories.EnterPuzzleViewModelFactory
 import com.allanrodriguez.sudokusolver.factories.SudokuSolverFactory
+import com.allanrodriguez.sudokusolver.utilities.showDialogFragment
 import com.allanrodriguez.sudokusolver.viewmodels.EnterPuzzleViewModel
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_enter_puzzle.*
@@ -61,7 +64,12 @@ class EnterPuzzleFragment : Fragment() {
             }
         }
 
-        viewModel.addCameraButtonClickListener(::launchCameraDialog)
+        viewModel.addCameraButtonClickListener {
+            context?.let { c ->
+                val intent = Intent(c, CameraActivity::class.java)
+                startActivity(intent)
+            }
+        }
 
         sudoku_layout.post {
             val layoutParams: ViewGroup.LayoutParams = scrollable_sudoku_layout.layoutParams
@@ -162,32 +170,6 @@ class EnterPuzzleFragment : Fragment() {
                 Log.i(tag, "Requesting camera permission...")
                 requestPermissions(arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
             }
-        }
-    }
-
-    private fun showDialogFragment(dialog: DialogFragment) {
-        val localFragmentManager: FragmentManager? = fragmentManager
-
-        if (localFragmentManager == null) {
-            Log.e(TAG, "FragmentManager was null when attempting to show dialog fragment.")
-            return
-        }
-
-        // Show the dialog in a small pop-up window if app is run on a tablet.
-        if (isLargeLayout) {
-            dialog.show(localFragmentManager, dialog::class.java.simpleName)
-        } else {
-            localFragmentManager
-                    .beginTransaction()
-                    .setCustomAnimations(
-                            R.anim.slide_up,
-                            R.anim.slide_down,
-                            R.anim.slide_up,
-                            R.anim.slide_down
-                    )
-                    .add(android.R.id.content, dialog, dialog::class.java.simpleName)
-                    .addToBackStack(null)
-                    .commit()
         }
     }
 

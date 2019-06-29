@@ -16,6 +16,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".activities.CameraActivity"
+            android:label="@string/title_fragment_camera_dialog"
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/Theme.MaterialComponents.DialogWhenLarge" />
+        <activity
             android:name=".activities.MainActivity"
             android:label="@string/title_activity_main"
             android:screenOrientation="sensorPortrait"

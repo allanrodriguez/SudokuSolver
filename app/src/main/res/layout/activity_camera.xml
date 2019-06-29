@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:context=".activities.CameraActivity">
+
+        <TextureView
+            android:id="@+id/viewfinder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/image_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/description_image_preview"
+            android:scaleType="centerCrop"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/top_screen"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/transparentBlack"
+            app:layout_constraintBottom_toTopOf="@+id/sudoku_area"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/top_border"
+            android:layout_width="0dp"
+            android:layout_height="2dp"
+            android:background="@color/yellow"
+            app:layout_constraintBottom_toTopOf="@+id/sudoku_area"
+            app:layout_constraintEnd_toStartOf="@+id/right_screen"
+            app:layout_constraintStart_toEndOf="@+id/left_screen" />
+
+        <View
+            android:id="@+id/left_screen"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/transparentBlack"
+            app:layout_constraintBottom_toTopOf="@id/bottom_screen"
+            app:layout_constraintEnd_toStartOf="@id/left_border"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/top_screen" />
+
+        <View
+            android:id="@+id/left_border"
+            android:layout_width="2dp"
+            android:layout_height="0dp"
+            android:background="@color/yellow"
+            app:layout_constraintBottom_toTopOf="@+id/bottom_screen"
+            app:layout_constraintEnd_toStartOf="@+id/sudoku_area"
+            app:layout_constraintTop_toBottomOf="@+id/top_screen" />
+
+        <View
+            android:id="@+id/sudoku_area"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.3"
+            app:layout_constraintWidth_max="300dp" />
+
+        <View
+            android:id="@+id/right_border"
+            android:layout_width="2dp"
+            android:layout_height="0dp"
+            android:background="@color/yellow"
+            app:layout_constraintBottom_toTopOf="@+id/bottom_screen"
+            app:layout_constraintStart_toEndOf="@+id/sudoku_area"
+            app:layout_constraintTop_toBottomOf="@+id/top_screen" />
+
+        <View
+            android:id="@+id/right_screen"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/transparentBlack"
+            app:layout_constraintBottom_toTopOf="@id/bottom_screen"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/right_border"
+            app:layout_constraintTop_toBottomOf="@+id/top_screen" />
+
+        <View
+            android:id="@+id/bottom_border"
+            android:layout_width="0dp"
+            android:layout_height="2dp"
+            android:background="@color/yellow"
+            app:layout_constraintEnd_toStartOf="@+id/right_screen"
+            app:layout_constraintStart_toEndOf="@+id/left_screen"
+            app:layout_constraintTop_toBottomOf="@+id/sudoku_area" />
+
+        <View
+            android:id="@+id/bottom_screen"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/transparentBlack"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/bottom_border" />
+
+        <TextView
+            android:id="@+id/camera_directions"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="@string/header_camera_directions"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toTopOf="@+id/sudoku_area"
+            app:layout_constraintEnd_toStartOf="@+id/right_screen"
+            app:layout_constraintStart_toEndOf="@+id/left_screen" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/button_take_picture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/yellow"
+            android:onClick="onShutterButtonClick"
+            android:src="@drawable/ic_photo_camera_black_24dp"
+            app:fabSize="normal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/bottom_screen" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="0dp">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/black"
+            app:popupTheme="@style/AppTheme.AppBarOverlay"
+            app:title="@string/title_fragment_camera_dialog" />
+    </com.google.android.material.appbar.AppBarLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
