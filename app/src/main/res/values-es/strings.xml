@@ -4,6 +4,9 @@
     <string name="title_activity_main">@string/app_name</string>
     <string name="title_fragment_camera_dialog">Buscar sudoku</string>
 
+    <string name="navigation_drawer_open">Abrir cajón de navegación</string>
+    <string name="navigation_drawer_close">Cerrar cajón de navegación</string>
+
     <string name="header_camera_directions">
         Posicione el sudoku dentro del cuadro y tome una foto.
     </string>
