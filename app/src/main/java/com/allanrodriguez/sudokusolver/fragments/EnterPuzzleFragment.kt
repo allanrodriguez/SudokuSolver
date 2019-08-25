@@ -9,11 +9,10 @@ import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.allanrodriguez.sudokusolver.R
@@ -25,7 +24,6 @@ import com.allanrodriguez.sudokusolver.factories.SudokuSolverFactory
 import com.allanrodriguez.sudokusolver.utilities.showDialogFragment
 import com.allanrodriguez.sudokusolver.viewmodels.EnterPuzzleViewModel
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.fragment_enter_puzzle.*
 
 class EnterPuzzleFragment : Fragment() {
 
@@ -34,8 +32,11 @@ class EnterPuzzleFragment : Fragment() {
     private lateinit var viewModel: EnterPuzzleViewModel
     private var isLargeLayout = false
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_enter_puzzle, container, false)
+    override fun onCreateView(inflater: LayoutInflater,
+                              container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        binding =
+                DataBindingUtil.inflate(inflater, R.layout.fragment_enter_puzzle, container, false)
 
         return binding.root
     }
@@ -45,36 +46,42 @@ class EnterPuzzleFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
-        inputMethodManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager =
+                context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         isLargeLayout = resources.getBoolean(R.bool.large_layout)
 
         val sudokuSolverFactory = SudokuSolverFactory()
         val enterPuzzleViewModelFactory = EnterPuzzleViewModelFactory(sudokuSolverFactory)
-        viewModel = ViewModelProviders.of(this, enterPuzzleViewModelFactory).get(EnterPuzzleViewModel::class.java)
+        viewModel =
+                ViewModelProviders.of(this, enterPuzzleViewModelFactory)
+                        .get(EnterPuzzleViewModel::class.java)
         binding.enterPuzzleVm = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
         setUpObservables()
 
         // Remove focus from puzzle EditTexts on click outside
-        scrollable_sudoku_layout.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                inputMethodManager.hideSoftInputFromWindow(v.windowToken, 0)
-            }
+        activity?.apply {
+            findViewById<ConstraintLayout>(R.id.scrollable_sudoku_layout).onFocusChangeListener =
+                    View.OnFocusChangeListener { v: View, hasFocus: Boolean ->
+                        if (hasFocus) {
+                            inputMethodManager.hideSoftInputFromWindow(v.windowToken, 0)
+                        }
+                    }
         }
 
         viewModel.addCameraButtonClickListener {
-            context?.let { c ->
-                val intent = Intent(c, CameraActivity::class.java)
-                startActivity(intent)
-            }
+            context?.let(::launchCameraDialog)
         }
 
-        sudoku_layout.post {
-            val layoutParams: ViewGroup.LayoutParams = scrollable_sudoku_layout.layoutParams
-            layoutParams.height = sudoku_layout.height
-            scrollable_sudoku_layout.layoutParams = layoutParams
+        activity?.apply {
+            val sudokuLayout = findViewById<ConstraintLayout>(R.id.sudoku_layout)
+            sudokuLayout.post {
+                val scrollableSudokuLayout = findViewById<ConstraintLayout>(R.id.scrollable_sudoku_layout)
+                scrollableSudokuLayout.layoutParams =
+                        scrollableSudokuLayout.layoutParams.apply { height = sudokuLayout.height }
+            }
         }
     }
 
@@ -102,7 +109,9 @@ class EnterPuzzleFragment : Fragment() {
         return true
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<out String>,
+                                            grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         val cameraIndex: Int = permissions.indexOf(Manifest.permission.CAMERA)
@@ -110,7 +119,7 @@ class EnterPuzzleFragment : Fragment() {
         if (requestCode == MY_PERMISSIONS_REQUEST_CAMERA
                 && cameraIndex >= 0
                 && grantResults[cameraIndex] == PackageManager.PERMISSION_GRANTED) {
-            launchCameraDialog()
+            context?.let(::launchCameraDialog)
         } else {
             Log.i(tag, "Camera permission was denied.")
         }
@@ -142,33 +151,29 @@ class EnterPuzzleFragment : Fragment() {
         viewModel.showPuzzleFullDialog.observe(this, puzzleFullObserver)
     }
 
-    private fun launchCameraDialog() {
-        val localContext: Context? = context
-
-        if (localContext == null) {
-            Log.e(TAG, "Context was null when attempting to launch camera dialog.")
-            return
-        }
-
+    private fun launchCameraDialog(c: Context) {
         when {
-            ContextCompat.checkSelfPermission(localContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
+            ContextCompat.checkSelfPermission(c,
+                    Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
                 Log.i(TAG, "Camera permission was granted.")
-                val cameraDialog: CameraDialogFragment = CameraDialogFragment.newInstance()
-                showDialogFragment(cameraDialog)
+                val intent = Intent(c, CameraActivity::class.java)
+                startActivity(intent)
             }
             shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
                 Log.i(TAG, "Showing camera permission request rationale.")
-                AlertDialog.Builder(localContext)
+                AlertDialog.Builder(c)
                         .setTitle("Sudoku Solver needs permission to use your camera to read puzzles from pictures.")
                         .setPositiveButton(android.R.string.ok) { _, _ ->
                             Log.i(tag, "Requesting camera permission...")
-                            requestPermissions(arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
+                            requestPermissions(arrayOf(Manifest.permission.CAMERA),
+                                    MY_PERMISSIONS_REQUEST_CAMERA)
                         }
                         .show()
             }
             else -> {
                 Log.i(tag, "Requesting camera permission...")
-                requestPermissions(arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
+                requestPermissions(arrayOf(Manifest.permission.CAMERA),
+                        MY_PERMISSIONS_REQUEST_CAMERA)
             }
         }
     }
@@ -179,10 +184,14 @@ class EnterPuzzleFragment : Fragment() {
                 .setPositiveButton(R.string.yes) { _, _ ->
                     viewModel.clear()
 
-                    Snackbar.make(scrollable_sudoku_layout, R.string.text_sudoku_cleared, Snackbar.LENGTH_LONG)
-                            .setAction(R.string.action_dismiss) { }
-                            .setAnchorView(enter_puzzle_camera_fab)
-                            .show()
+                    activity?.apply {
+                        Snackbar.make(findViewById(R.id.scrollable_sudoku_layout),
+                                R.string.text_sudoku_cleared,
+                                Snackbar.LENGTH_LONG)
+                                .setAction(R.string.action_dismiss) { }
+                                .setAnchorView(R.id.enter_puzzle_camera_fab)
+                                .show()
+                    }
                 }
                 .setNegativeButton(R.string.no, null)
                 .show()
