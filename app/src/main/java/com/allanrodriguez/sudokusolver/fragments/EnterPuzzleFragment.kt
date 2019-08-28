@@ -12,25 +12,28 @@ import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.allanrodriguez.sudokusolver.R
 import com.allanrodriguez.sudokusolver.abstractions.MY_PERMISSIONS_REQUEST_CAMERA
 import com.allanrodriguez.sudokusolver.activities.CameraActivity
 import com.allanrodriguez.sudokusolver.databinding.FragmentEnterPuzzleBinding
-import com.allanrodriguez.sudokusolver.factories.EnterPuzzleViewModelFactory
-import com.allanrodriguez.sudokusolver.factories.SudokuSolverFactory
 import com.allanrodriguez.sudokusolver.utilities.showDialogFragment
 import com.allanrodriguez.sudokusolver.viewmodels.EnterPuzzleViewModel
 import com.google.android.material.snackbar.Snackbar
+import dagger.android.support.DaggerFragment
+import javax.inject.Inject
 
-class EnterPuzzleFragment : Fragment() {
+class EnterPuzzleFragment : DaggerFragment() {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    private val viewModel by viewModels<EnterPuzzleViewModel> { viewModelFactory }
+
+    private var isLargeLayout = false
     private lateinit var inputMethodManager: InputMethodManager
     private lateinit var binding: FragmentEnterPuzzleBinding
-    private lateinit var viewModel: EnterPuzzleViewModel
-    private var isLargeLayout = false
 
     override fun onCreateView(inflater: LayoutInflater,
                               container: ViewGroup?,
@@ -51,11 +54,6 @@ class EnterPuzzleFragment : Fragment() {
 
         isLargeLayout = resources.getBoolean(R.bool.large_layout)
 
-        val sudokuSolverFactory = SudokuSolverFactory()
-        val enterPuzzleViewModelFactory = EnterPuzzleViewModelFactory(sudokuSolverFactory)
-        viewModel =
-                ViewModelProviders.of(this, enterPuzzleViewModelFactory)
-                        .get(EnterPuzzleViewModel::class.java)
         binding.enterPuzzleVm = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 

@@ -6,8 +6,10 @@ import androidx.lifecycle.ViewModel
 import com.allanrodriguez.libbruteforcesudokusolver.abstractions.ISudokuSolver
 import com.allanrodriguez.sudokusolver.abstractions.IEnterPuzzleViewModel
 import com.allanrodriguez.sudokusolver.abstractions.ISudokuSolverFactory
+import javax.inject.Inject
 
-class EnterPuzzleViewModel(private val factory: ISudokuSolverFactory) : ViewModel(), IEnterPuzzleViewModel {
+class EnterPuzzleViewModel @Inject constructor(private val factory: ISudokuSolverFactory) : ViewModel(),
+        IEnterPuzzleViewModel {
 
     override val isCameraButtonClickable: MutableLiveData<Boolean> = MutableLiveData()
     override val isSolving: MutableLiveData<Boolean> = MutableLiveData()
